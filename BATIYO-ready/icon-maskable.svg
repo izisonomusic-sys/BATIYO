@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="BATIYO">
+  <!-- Icône maskable : le motif reste dans la zone sûre (80 % centraux) -->
+  <rect width="512" height="512" fill="#0F766E"/>
+  <path d="M146 350V222l110-73 110 73v128" fill="none" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M206 350v-74h100v74" fill="none" stroke="#F59E0B" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,15 @@
+services:
+  - type: static
+    name: batiyo
+    plan: free
+    buildCommand: "echo 'BATIYO static site'"
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: true
+    autoDeployTrigger: commit
+    headers:
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff

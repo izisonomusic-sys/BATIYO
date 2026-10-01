@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="BATIYO">
+  <rect width="512" height="512" rx="112" fill="#0F766E"/>
+  <path d="M112 368V208l144-96 144 96v160" fill="none" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M192 368v-96h128v96" fill="none" stroke="#F59E0B" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

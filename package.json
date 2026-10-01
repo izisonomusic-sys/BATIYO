@@ -1,0 +1,22 @@
+{
+  "name": "batiyo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BATIYO — l'assistant intelligent de gestion des artisans et petites entreprises (Togo / Afrique de l'Ouest)",
+  "scripts": {
+    "serve": "node tools/serve.js 8080",
+    "test": "node --test tests/logic.test.js",
+    "test:dom": "node tests/dom.test.js",
+    "test:parcours": "node tests/parcours.test.js",
+    "test:all": "node --test tests/logic.test.js && node tests/dom.test.js",
+    "captures": "node tools/screens.js http://localhost:8080 captures",
+    "sync:reference": "node tools/gen-supabase-reference.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0",
+    "playwright": "^1.47.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,4 @@
+node_modules/
+captures/
+*.tmp.js
+.DS_Store

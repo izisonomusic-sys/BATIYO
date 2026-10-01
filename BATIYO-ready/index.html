@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BATIYO — Devis et gestion pour artisans</title>
+<meta name="description" content="BATIYO aide les artisans à créer des devis, suivre leurs dépenses et gérer leurs chantiers. Devis, dépenses et bénéfices. Simplement.">
+<meta name="theme-color" content="#0F766E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BATIYO">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:title" content="BATIYO — Devis et gestion pour artisans">
+<meta property="og:description" content="Créez vos devis et factures, suivez vos dépenses et connaissez la rentabilité de vos chantiers depuis votre téléphone.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_TG">
+
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<!-- Inter est utilisé s'il est disponible ; sinon le système prend le relais (l'app reste lisible hors connexion) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="src/styles.css">
+
+<!-- Thème initial : évite le clignotement blanc avant le rendu de l'application -->
+<style>
+  #boot { position: fixed; inset: 0; display: grid; place-items: center; background: #F8FAFC; z-index: 200; }
+  #boot .b { text-align: center; color: #64748B; font-size: 14px; }
+  #boot .mark { width: 56px; height: 56px; border-radius: 18px; background: #0F766E; margin: 0 auto 14px; display: grid; place-items: center; }
+  #boot .bar { width: 132px; height: 5px; border-radius: 999px; background: #E2E8F0; margin: 14px auto 0; overflow: hidden; }
+  #boot .bar i { display: block; width: 40%; height: 100%; background: #0F766E; border-radius: 999px; animation: load 1.1s ease-in-out infinite; }
+  @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+</style>
+</head>
+<body>
+<div id="boot">
+  <div class="b">
+    <div class="mark">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M7 23V13l9-6 9 6v10" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 23v-6h8v6" stroke="#F59E0B" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div><strong style="color:#0F172A">BATIYO</strong></div>
+    <div>L'assistant intelligent des artisans</div>
+    <div class="bar"><i></i></div>
+  </div>
+</div>
+
+<div id="app" aria-live="polite"></div>
+
+<!-- Application modulaire : l'ordre de chargement est indiqué par le préfixe des fichiers -->
+<script src="src/01-config.js"></script>
+<script src="src/02-professions.js"></script>
+<script src="src/03-utils.js"></script>
+<script src="src/04-storage.js"></script>
+<script src="src/05-calculations.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+<script src="src/06-core.js"></script>
+<script src="src/07-repository.js"></script>
+<script src="src/08-reference.js"></script>
+<script src="src/09-services.js"></script>
+<script src="src/10-assistant.js"></script>
+<script src="src/11-pdf.js"></script>
+<script src="src/13-ui.js"></script>
+<script src="src/14-screens-public.js"></script>
+<script src="src/15-shared.js"></script>
+<script src="src/16-screens-dashboard.js"></script>
+<script src="src/17-screens-docs.js"></script>
+<script src="src/18-screens-ops.js"></script>
+<script src="src/19-app.js"></script>
+<script>
+  /* Retrait de l'écran de démarrage dès que l'application est montée */
+  (function () {
+    function done() { var b = document.getElementById('boot'); if (b) b.remove(); }
+    if (window.BATIYO && window.BATIYO.router) done();
+    else setTimeout(function () {
+      if (window.BATIYO && window.BATIYO.router) done();
+      else setTimeout(done, 900);
+    }, 120);
+    window.addEventListener('error', function () {
+      var b = document.getElementById('boot');
+      if (b) b.innerHTML = '<div class="b"><strong>BATIYO n’a pas pu démarrer</strong><div style="margin-top:8px">Vérifiez que tous les fichiers du dossier <code>src/</code> sont présents, puis rechargez la page.</div></div>';
+    });
+  })();
+</script>
+</body>
+</html>

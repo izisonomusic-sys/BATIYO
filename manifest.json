@@ -1,0 +1,22 @@
+{
+  "name": "BATIYO — Devis et gestion pour artisans",
+  "short_name": "BATIYO",
+  "description": "Devis, factures, chantiers, dépenses et rentabilité pour les artisans et petites entreprises.",
+  "lang": "fr",
+  "start_url": "./index.html#/dashboard",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0F766E",
+  "categories": ["business", "productivity", "finance"],
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Nouveau devis", "url": "./index.html#/quotes/new" },
+    { "name": "Dépenses", "url": "./index.html#/expenses" },
+    { "name": "Assistant BATIYO", "url": "./index.html#/assistant" }
+  ]
+}
