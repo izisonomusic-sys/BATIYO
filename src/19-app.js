@@ -75,7 +75,7 @@
     { path: '/clients', label: 'Clients', icon: 'users', more: true },
     { path: '/expenses', label: 'Dépenses', icon: 'coins', more: true },
     { path: '/catalogue-', label: 'Catalogue', icon: 'grid', more: true, path2: '/catalog' },
-    { path: '/assistant', label: 'Assistant IA', icon: 'sparkles', more: false },
+    { path: '/assistant', label: 'Assistant IA', icon: 'sparkles', more: true },
     { path: '/pricing', label: 'Abonnement', icon: 'creditCard', more: true },
     { path: '/profile', label: 'Profil', icon: 'user', more: true }
   ];
