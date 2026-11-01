@@ -75,7 +75,8 @@
     { path: '/clients', label: 'Clients', icon: 'users', more: true },
     { path: '/expenses', label: 'Dépenses', icon: 'coins', more: true },
     { path: '/catalogue-', label: 'Catalogue', icon: 'grid', more: true, path2: '/catalog' },
-    { path: '/assistant', label: 'Assistant', icon: 'sparkles', more: true },
+    { path: '/assistant', label: 'Assistant IA', icon: 'sparkles', more: false },
+    { path: '/pricing', label: 'Abonnement', icon: 'creditCard', more: true },
     { path: '/profile', label: 'Profil', icon: 'user', more: true }
   ];
 
@@ -187,17 +188,18 @@
     shell.innerHTML = '<aside class="sidebar"></aside><div class="main"><header class="topbar"></header><div class="content"><div class="content-inner" id="view"></div></div></div>';
     const sidebar = B.$('.sidebar', shell);
 
-    /* Sidebar (#170) */
+    /* Sidebar BATIYO — navigation regroupée, inspirée de la maquette fournie. */
     sidebar.appendChild(B.el('<a class="brand" href="#/dashboard">' + B.screens.logoMark() + '<span class="name">BATIYO</span></a>'));
+    sidebar.appendChild(B.el('<div class="nav-caption">ESPACE DE TRAVAIL</div>'));
     NAV.filter(function (n) { return !n.more; }).forEach(function (n) {
       const link = B.el('<a class="nav-link' + (isActive(n.path) ? ' active' : '') + '" href="#' + n.path + '">' + ui().icon(n.icon, 19) + h(n.label) +
         (n.path === '/quotes' ? badgeCount('quotes') : '') + (n.path === '/invoices' ? badgeCount('invoices') : '') + '</a>');
       sidebar.appendChild(link);
     });
-    sidebar.appendChild(B.el('<div class="divider"></div>'));
+    sidebar.appendChild(B.el('<div class="nav-caption nav-caption-spaced">GESTION</div>'));
     [['/clients', 'Clients', 'users'], ['/expenses', 'Dépenses', 'coins'], ['/catalog', 'Catalogue', 'grid'],
-     ['/documents', 'Documents', 'file'], ['/analysis', 'Analyse', 'chart'], ['/assistant', 'Assistant', 'sparkles'],
-     ['/profile', 'Profil', 'user']].forEach(function (n) {
+     ['/documents', 'Documents', 'file'], ['/analysis', 'Analyse', 'chart'], ['/assistant', 'Assistant IA', 'sparkles'],
+     ['/pricing', 'Abonnement', 'creditCard'], ['/profile', 'Profil', 'user']].forEach(function (n) {
       sidebar.appendChild(B.el('<a class="nav-link' + (isActive(n[0]) ? ' active' : '') + '" href="#' + n[0] + '">' + ui().icon(n[2], 19) + h(n[1]) + '</a>'));
     });
     sidebar.appendChild(B.el('<div class="spacer"></div>'));
@@ -270,7 +272,7 @@
     return shell;
   }
 
-  const MORE_PATHS = ['/clients', '/expenses', '/catalog', '/documents', '/analysis', '/assistant', '/profile', '/settings'];
+  const MORE_PATHS = ['/clients', '/expenses', '/catalog', '/documents', '/analysis', '/assistant', '/pricing', '/profile', '/settings'];
   function isActive(path) {
     const cur = router.ctx ? router.ctx.path : '/';
     if (path === '/dashboard') return cur === '/dashboard' || cur === '/';
@@ -307,8 +309,8 @@
     const m = ui().sheet({ title: 'Plus', size: 'wide' });
     const list = B.el('<div class="list"></div>');
     [['/clients', 'Clients', 'users'], ['/expenses', 'Dépenses', 'coins'], ['/catalog', 'Catalogue', 'grid'],
-     ['/documents', 'Documents', 'file'], ['/analysis', 'Analyse', 'chart'], ['/assistant', 'Assistant BATIYO', 'sparkles'],
-     ['/profile', 'Profil', 'user'], ['/settings', 'Paramètres', 'settings']].forEach(function (n) {
+     ['/documents', 'Documents', 'file'], ['/analysis', 'Analyse', 'chart'], ['/assistant', 'Assistant IA', 'sparkles'],
+     ['/pricing', 'Abonnement', 'creditCard'], ['/profile', 'Profil', 'user'], ['/settings', 'Paramètres', 'settings']].forEach(function (n) {
       const row = B.el('<button class="list-item"><div class="avatar neutral">' + ui().icon(n[2], 18) + '</div>' +
         '<div class="body"><div class="t1">' + h(n[1]) + '</div></div>' + ui().icon('chevronRight', 16) + '</button>');
       row.addEventListener('click', function () { m.close(); B.router.go(n[0]); });
