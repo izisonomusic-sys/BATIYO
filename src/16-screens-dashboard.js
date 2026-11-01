@@ -17,7 +17,7 @@
     const focus = B.professionService.focus();
     const isEmpty = !stats.clients && !stats.quotes_count && !stats.projects_total && !stats.spent;
 
-    const wrap = B.el('<div class="stack"></div>');
+    const wrap = B.el('<div class="stack dashboard-view"></div>');
     const hour = new Date().getHours();
     const hello = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
 
@@ -39,7 +39,7 @@
         '<button class="btn btn-ghost" data-new="quote">Créer un devis</button></div></div>'));
     }
 
-    const quick = B.el('<div class="grid grid-4-md" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"></div>');
+    const quick = B.el('<div class="grid quick-actions grid-4-md" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"></div>');
     [['quote', 'doc', 'Nouveau devis'], ['invoice', 'invoice', 'Nouvelle facture'], ['expense', 'coins', 'Dépense'], ['client', 'users', 'Client']]
       .forEach(function (a) {
         const b = B.el('<button class="card card-hover" style="text-align:left;padding:14px;border:1px solid var(--line)"><div class="row" style="gap:10px">' +
@@ -51,7 +51,7 @@
     wrap.appendChild(quick);
 
     /* Cartes principales (#20, #131) */
-    const cards = B.el('<div class="grid grid-2 grid-4-md"></div>');
+    const cards = B.el('<div class="grid dashboard-kpis grid-2 grid-4-md"></div>');
     cards.innerHTML =
       statCard('trending', 'Chiffre d’affaires', B.money(stats.revenue), 'Devis acceptés + factures hors devis', 'primary') +
       statCard('coins', 'Dépenses', B.money(stats.spent), 'Toutes dépenses enregistrées', 'warn') +
