@@ -432,13 +432,14 @@
     const share = B.el('<button class="btn btn-ghost">' + ui().icon('whatsapp', 17) + ' Partager</button>');
     const close = B.el('<button class="btn btn-ghost" data-close>Fermer</button>');
     m.foot.appendChild(close); m.foot.appendChild(share); m.foot.appendChild(print);
-    print.addEventListener('click', function () { B.pdf.openPreview(html, { filename: doc.number || 'document' }); });
+    print.addEventListener('click', function () { B.pdf.openPreview(html, { filename: doc.number || 'document', documentType: entity, documentId: doc.id }); });
     share.addEventListener('click', function () { shareDialog(entity, doc); });
     return m;
   }
 
   /* --------------------------------- Partage ------------------------------ */
-  function shareDialog(entity, doc) {
+  async function shareDialog(entity, doc) {
+    if (B.entitlementService && !(await B.entitlementService.requireDocumentExport(entity, doc))) return;
     const msg = B.pdf.shareMessage(entity, doc);
     const client = B.clientService.get(doc.client_id);
     const body = B.el('<div class="stack"></div>');
@@ -455,7 +456,7 @@
       const text = B.$('[data-msg]', body).value;
       const phone = client && client.phone ? client.phone : '';
       window.open(B.waLink(phone, text), '_blank', 'noopener');
-      B.pdf.openPreview(entity === 'quote' ? B.pdf.quoteHTML(doc) : B.pdf.invoiceHTML(doc), { filename: doc.number });
+      B.pdf.openPreview(entity === 'quote' ? B.pdf.quoteHTML(doc) : B.pdf.invoiceHTML(doc), { filename: doc.number, documentType: entity, documentId: doc.id });
       ui().toast('Message prêt. Pensez à joindre le PDF.', 'info');
       m.close();
     });

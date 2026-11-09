@@ -412,38 +412,36 @@
   }
 
   /* --------------------------------- Connexion ---------------------------- */
+  function passwordField(label, name, placeholder, autocomplete) {
+    const field = ui().field({ label: label, name: name, type: 'password', required: true, placeholder: placeholder, autocomplete: autocomplete });
+    field.style.position = 'relative';
+    field._input.style.paddingRight = '82px';
+    const toggle = B.el('<button type="button" class="btn btn-ghost btn-sm" aria-label="Afficher le mot de passe" style="position:absolute;right:6px;top:31px;padding:6px 9px;min-height:30px">Afficher</button>');
+    toggle.addEventListener('click', function () {
+      const visible = field._input.type === 'password';
+      field._input.type = visible ? 'text' : 'password';
+      toggle.textContent = visible ? 'Masquer' : 'Afficher';
+      toggle.setAttribute('aria-label', visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    });
+    field.appendChild(toggle);
+    return field;
+  }
+
+  /* --------------------------------- Connexion ---------------------------- */
   function login() {
     return authLayout({
       title: 'Content de vous revoir',
-      subtitle: 'Connectez-vous pour retrouver vos devis, vos chantiers et vos dépenses.',
+      subtitle: 'Connectez-vous avec votre numéro de téléphone et votre mot de passe.',
       form: function (form) {
-        form.appendChild(ui().field({ label: 'Adresse email', name: 'email', type: 'email', placeholder: 'vous@exemple.tg', required: true, autocomplete: 'username' }));
-        form.appendChild(ui().field({ label: 'Mot de passe', name: 'password', type: 'password', placeholder: '••••••••', required: true, autocomplete: 'current-password' }));
-        const forgot = B.el('<button type="button" class="btn btn-ghost btn-sm" style="align-self:flex-start">Mot de passe oublié ?</button>');
-        forgot.addEventListener('click', function () {
-          const body = B.el('<div></div>');
-          const form = B.el('<form class="form-grid" data-reset-form></form>');
-          form.appendChild(ui().field({ label: 'Adresse email', name: 'email', type: 'email', required: true, placeholder: 'vous@exemple.tg' }));
-          body.appendChild(form);
-          const hint = B.el('<div class="tiny muted mt-8">Un lien de réinitialisation sera envoyé à votre adresse email.</div>');
-          body.appendChild(hint);
-          const modal = ui().modal({ title: 'Mot de passe oublié', body: body });
-          const send = B.el('<button class="btn btn-primary">Envoyer le lien</button>');
-          send.addEventListener('click', async function () {
-            const email = B.$('[name="email"]', form).value;
-            const res = await B.authService.resetPassword(email);
-            if (res.ok) { ui().toast(res.message, 'success'); modal.close(); }
-            else ui().toast(res.error, 'error');
-          });
-          modal.foot.appendChild(send);
-          form.addEventListener('submit', function (e) { e.preventDefault(); send.click(); });
-        });
-        form.appendChild(forgot);
+        form.appendChild(ui().field({ label: 'Numéro de téléphone', name: 'phone', type: 'tel', placeholder: '+228 90 12 34 56', required: true, autocomplete: 'tel' }));
+        form.appendChild(passwordField('Mot de passe', 'password', 'Votre mot de passe', 'current-password'));
+        const help = B.el('<div class="tiny muted">Utilisez votre numéro avec l’indicatif international (ex. +228 pour le Togo).</div>');
+        form.appendChild(help);
         return {
           submitLabel: 'Se connecter',
           onSubmit: async function (values, scope) {
-            const res = await B.authService.login(values.email, values.password);
-            if (!res.ok) { ui().showErrors(scope, { email: res.error }); ui().toast(res.error, 'error'); return; }
+            const res = await B.authService.login(values.phone, values.password);
+            if (!res.ok) { ui().showErrors(scope, { phone: res.error }); ui().toast(res.error, 'error'); return; }
             ui().toast('Bonjour ' + (res.user && res.user.name ? res.user.name : '') + ', ravi de vous revoir.', 'success');
             B.router.go('/dashboard');
           }
@@ -457,18 +455,18 @@
     const selected = { profession_id: null };
     const wrap = B.el('<div></div>');
     wrap.appendChild(authLayout({
-      title: 'Parlons de votre activité',
-      subtitle: 'Créez votre compte. Votre métier déterminera automatiquement votre catalogue.',
+      title: 'Créez votre compte BATIYO',
+      subtitle: 'Quelques informations suffisent pour commencer à gérer votre activité.',
       wide: true,
       form: function (form) {
-        form.appendChild(ui().field({ label: 'Votre nom', name: 'name', required: true, placeholder: 'Ex : Kossi Amégan', autocomplete: 'name' }));
-        form.appendChild(ui().field({ label: 'Adresse email', name: 'email', type: 'email', required: true, placeholder: 'Ex : vous@exemple.tg', autocomplete: 'email' }));
-        form.appendChild(ui().field({ label: 'Téléphone', name: 'phone', type: 'tel', required: false, placeholder: 'Ex : +228 90 12 34 56' }));
-        form.appendChild(ui().field({ label: 'Mot de passe', name: 'password', type: 'password', required: true, placeholder: '6 caractères minimum', autocomplete: 'new-password' }));
-        form.appendChild(ui().field({ label: 'Nom de l’entreprise', name: 'business_name', required: true, placeholder: 'Ex : Batiyo Construction' }));
+        form.appendChild(ui().field({ label: 'Prénom', name: 'first_name', required: true, placeholder: 'Ex. : Kossi', autocomplete: 'given-name' }));
+        form.appendChild(ui().field({ label: 'Nom', name: 'last_name', required: true, placeholder: 'Ex. : Amégan', autocomplete: 'family-name' }));
+        form.appendChild(ui().field({ label: 'Numéro de téléphone', name: 'phone', type: 'tel', required: true, placeholder: '+228 90 12 34 56', autocomplete: 'tel', hint: 'Avec indicatif international, sans adresse e-mail et sans code SMS.' }));
+        form.appendChild(passwordField('Mot de passe', 'password', '6 caractères minimum', 'new-password'));
+        form.appendChild(ui().field({ label: 'Nom de l’entreprise', name: 'business_name', required: true, placeholder: 'Ex. : Batiyo Construction' }));
 
         const profField = B.el('<div class="field"><label>Quel est votre métier ? <span style="color:#DC2626">*</span></label>' +
-          '<div class="tiny muted">Le métier est obligatoire : il détermine le catalogue proposé dans vos devis.</div>' +
+          '<div class="tiny muted">Votre métier détermine le catalogue proposé dans vos devis et factures.</div>' +
           '<div class="prof-grid mt-8" data-prof></div><div class="error" data-error hidden></div></div>');
         const grid = B.$('[data-prof]', profField);
         B.PROFESSIONS.forEach(function (p) {
@@ -484,31 +482,29 @@
         form.appendChild(profField);
 
         return {
-          submitLabel: 'Créer mon espace',
+          submitLabel: 'Créer mon compte',
           onSubmit: async function (values, scope) {
             const res = await B.authService.register({
-              name: values.name, email: values.email, phone: values.phone,
-              password: values.password, business_name: values.business_name,
+              first_name: values.first_name,
+              last_name: values.last_name,
+              phone: values.phone,
+              password: values.password,
+              business_name: values.business_name,
               profession_id: selected.profession_id
             });
             if (!res.ok) {
-              const errors = Object.assign({}, res.errors || { email: res.error });
-              if (res.error && !res.errors) errors.email = res.error;
+              const errors = Object.assign({}, res.errors || { phone: res.error });
+              if (res.error && !res.errors) errors.phone = res.error;
               if (errors.profession_id) {
                 const e = B.$('.error', profField); e.textContent = errors.profession_id; e.hidden = false;
                 delete errors.profession_id;
               }
               ui().showErrors(scope, errors);
-              ui().toast('Vérifiez les informations saisies.', 'error');
+              ui().toast(res.error || 'Vérifiez les informations saisies.', 'error');
               return;
             }
-            if (res.pendingVerification) {
-              ui().toast('Compte créé. Vérifiez votre email pour confirmer votre adresse, puis connectez-vous.', 'info', { duration: 7000 });
-              B.router.go('/login');
-              return;
-            }
-            ui().toast('Compte créé. Bienvenue !', 'success');
-            B.router.go('/onboarding');
+            ui().toast('Votre compte est créé. Bienvenue sur BATIYO !', 'success');
+            B.router.go('/dashboard');
           }
         };
       }
@@ -669,27 +665,49 @@
   /* ---------------------------------- Tarifs ------------------------------ */
   function pricing() {
     const plans = [
-      { name: 'Gratuit', price: '0 FCFA', tag: 'Pour découvrir BATIYO', features: ['Clients et devis illimités', 'Catalogue de votre métier', 'PDF des devis et factures', 'Dépenses et budgets de chantier', 'Fonctionne hors connexion'], cta: 'Commencer gratuitement', featured: false },
-      { name: 'Pro', price: '5 000 FCFA', per: '/ mois', tag: 'Pour les artisans actifs', features: ['Tout le plan Gratuit', 'Assistant BATIYO illimité', 'Analyse et rapports', 'Photos de chantier et justificatifs', 'Modèles de devis par métier', 'Alertes de dépassement'], cta: 'Choisir Pro', featured: true },
-      { name: 'Business', price: '12 000 FCFA', per: '/ mois', tag: 'Pour les petites équipes', features: ['Tout le plan Pro', 'Plusieurs utilisateurs (bientôt)', 'Suivi de plusieurs chantiers en parallèle', 'Export des données', 'Support prioritaire'], cta: 'Choisir Business', featured: false }
+      { name: '1 mois', price: '3 500 FCFA', duration: 'Accès Pro pendant 1 mois', featured: false },
+      { name: '2 mois', price: '7 000 FCFA', duration: 'Accès Pro pendant 2 mois', featured: false },
+      { name: '6 mois', price: '35 000 FCFA', duration: 'Accès Pro pendant 6 mois', featured: true }
     ];
-    return publicPage('Tarifs', 'Des offres simples, sans engagement.', `
-      <div class="grid grid-3-md mt-16">
-        ${plans.map(function (p) {
-          return '<article class="card plan ' + (p.featured ? 'featured' : '') + '">' +
-            (p.featured ? '<div class="row-between">' + ui().badge('Le plus choisi', 'primary') + '</div>' : '') +
-            '<div><div class="strong">' + h(p.name) + '</div><div class="tiny muted">' + h(p.tag) + '</div></div>' +
-            '<div class="row" style="gap:6px;align-items:baseline"><span class="price">' + h(p.price) + '</span>' + (p.per ? '<span class="muted">' + h(p.per) + '</span>' : '') + '</div>' +
-            '<ul>' + p.features.map(function (f) { return '<li>' + ui().icon('check', 17) + '<span>' + h(f) + '</span></li>'; }).join('') + '</ul>' +
-            '<a class="btn ' + (p.featured ? 'btn-primary' : 'btn-ghost') + ' btn-block" href="#/register">' + h(p.cta) + '</a>' +
-            '</article>';
-        }).join('')}
+    return publicPage('Tarifs BATIYO', 'Commencez gratuitement, puis passez à Pro quand votre activité grandit.', `
+      <div class="grid grid-2-md mt-16">
+        <article class="card plan">
+          <div class="strong">Gratuit</div>
+          <div class="tiny muted">Essai à vie — sans paiement</div>
+          <div class="price">0 FCFA</div>
+          <ul>
+            <li>${ui().icon('check', 17)}<span>10 devis gratuits à vie</span></li>
+            <li>${ui().icon('check', 17)}<span>10 factures gratuites à vie</span></li>
+            <li>${ui().icon('check', 17)}<span>Création de brouillons sans limite</span></li>
+            <li>${ui().icon('check', 17)}<span>Clients, chantiers et dépenses</span></li>
+          </ul>
+          <div class="tiny muted">Après les 10 devis ou factures gratuits, vous pouvez continuer à créer des brouillons, mais le téléchargement PDF et le partage de ces nouveaux documents nécessitent Pro.</div>
+          <a class="btn btn-ghost btn-block mt-12" href="#/register">Créer mon compte gratuit</a>
+        </article>
+        <article class="card plan featured">
+          <div class="row-between"><div class="strong">BATIYO Pro</div>${ui().badge('Accès complet', 'primary')}</div>
+          <div class="tiny muted">Choisissez la durée qui vous convient.</div>
+          <div class="stack-sm mt-12">
+            ${plans.map(function (p) {
+              return '<div class="row-between" style="padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)">' +
+                '<div><div class="strong">' + h(p.name) + '</div><div class="tiny muted">' + h(p.duration) + '</div></div>' +
+                '<div class="strong">' + h(p.price) + '</div></div>';
+            }).join('')}
+          </div>
+          <ul class="mt-12">
+            <li>${ui().icon('check', 17)}<span>Téléchargement PDF des devis et factures</span></li>
+            <li>${ui().icon('check', 17)}<span>Partage des documents par WhatsApp</span></li>
+            <li>${ui().icon('check', 17)}<span>Assistant, analyses et rapports avancés</span></li>
+            <li>${ui().icon('check', 17)}<span>Conservation de toutes vos données</span></li>
+          </ul>
+          <div class="banner banner-info mt-12">${ui().icon('info', 18)} <span>Le paiement en ligne sera activé après la connexion de votre compte marchand PayDunya. Aucun abonnement ne sera activé avant confirmation du paiement.</span></div>
+        </article>
       </div>
-      <div class="banner banner-info mt-24">${ui().icon('info', 18)} <span><strong>Aucun paiement dans BATIYO pour le moment.</strong> Aucun moyen de paiement (Mobile Money, carte bancaire) n'est intégré. Les offres payantes seront activées dans une prochaine version.</span></div>
       <div class="card card-pad-lg mt-24">
-        <h3>Questions fréquentes sur les offres</h3>
-        <div class="mt-12">${faqItem('Puis-je changer d’offre plus tard ?', 'Oui. Les offres sont indépendantes de vos données : vous pouvez changer à tout moment sans perdre vos devis, factures ou chantiers.')}</div>
-        <div>${faqItem('Que se passe-t-il si je dépasse le plan Gratuit ?', 'Rien n’est bloqué brutalement : vous serez simplement invité à passer à une offre supérieure lorsque les fonctionnalités avancées vous seront utiles.')}</div>
+        <h3>Questions fréquentes</h3>
+        <div class="mt-12">${faqItem('Les 10 devis et 10 factures gratuits se renouvellent-ils chaque mois ?', 'Non. Il s’agit d’un essai unique à vie par compte. Le compteur ne revient pas à zéro chaque mois.')}</div>
+        <div>${faqItem('Puis-je continuer à travailler après avoir utilisé mes documents gratuits ?', 'Oui. Vous pouvez toujours créer et enregistrer des brouillons. Le téléchargement PDF et le partage des documents créés au-delà du quota nécessitent un abonnement Pro.')}</div>
+        <div>${faqItem('Est-ce que je perds mes documents si mon abonnement expire ?', 'Non. Vos devis, factures et autres données restent conservés. Les droits Pro restent actifs pendant la période de grâce de 7 jours après expiration.')}</div>
       </div>`, true);
   }
 

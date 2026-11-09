@@ -260,8 +260,12 @@
   }
 
   /* --------------------- Ouverture / impression / export ------------------ */
-  function openPreview(html, opts) {
+  async function openPreview(html, opts) {
     const o = opts || {};
+    if (o.documentType && o.documentId && B.entitlementService) {
+      const allowed = await B.entitlementService.requireDocumentExport(o.documentType, { id: o.documentId });
+      if (!allowed) return { ok: false, reason: 'subscription_required' };
+    }
     /* 1) Fenêtre dédiée : impression et « Enregistrer en PDF » disponibles */
     let win = null;
     try { win = window.open('', '_blank'); } catch (e) { win = null; }
@@ -295,8 +299,8 @@
     page: page,
     openPreview: openPreview,
     shareMessage: shareMessage,
-    previewQuote: function (quote, opts) { return openPreview(quoteHTML(quote, opts), { filename: (quote.number || 'devis') }); },
-    previewInvoice: function (invoice, opts) { return openPreview(invoiceHTML(invoice, opts), { filename: (invoice.number || 'facture') }); },
+    previewQuote: function (quote, opts) { return openPreview(quoteHTML(quote, opts), { filename: (quote.number || 'devis'), documentType: 'quote', documentId: quote.id }); },
+    previewInvoice: function (invoice, opts) { return openPreview(invoiceHTML(invoice, opts), { filename: (invoice.number || 'facture'), documentType: 'invoice', documentId: invoice.id }); },
     /* Export CSV préparé (#137) */
     csv: function (filename, rows, headers) {
       const lines = [headers.join(';')].concat(rows.map(function (r) {
