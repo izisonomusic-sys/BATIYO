@@ -779,3 +779,80 @@ body.no-fab .fab-wrap { display: none; }
   .sidebar, .topbar, .bottomnav, .fab-wrap, .toasts, .no-print { display: none !important; }
   .content { padding: 0; }
 }
+
+
+/* ----------------------- Landing BATIYO — rafraîchissement ---------------- */
+.hero {
+  padding: 58px 0 46px;
+  background: linear-gradient(132deg, #F5FAF9 0%, #FFFFFF 54%, #EFF8F6 100%);
+}
+.hero h1 { font-size: clamp(34px, 4.3vw, 48px); line-height: 1.06; letter-spacing: -1.7px; max-width: 640px; }
+.hero .lead { max-width: 570px; font-size: 17px; line-height: 1.7; color: #526477; }
+.hero .micro { display: inline-flex; margin-top: 20px; padding: 8px 12px; border-radius: 999px; background: #E7F3F1; color: #115E59; font-size: 12.5px; }
+.hero-cta { flex-direction: row; flex-wrap: wrap; gap: 12px; }
+.hero-cta .btn { box-shadow: 0 8px 20px rgba(15, 118, 110, .12); transition: transform .22s var(--ease), box-shadow .22s var(--ease); }
+.hero-cta .btn:hover { transform: translateY(-3px); box-shadow: 0 14px 26px rgba(15, 118, 110, .18); }
+.hero-visual { margin-bottom: 66px; animation: heroReveal .7s var(--ease) both; }
+.hero-photo { aspect-ratio: 4 / 4.7; object-position: 50% 38%; border: 6px solid #fff; border-radius: 30px; }
+.hero-visual-phone { left: -18px; bottom: -54px; width: 168px; animation: heroFloat 5.5s ease-in-out infinite; }
+.hero-badge { right: -12px; left: auto; bottom: 24px; max-width: 245px; animation: heroFloat 6.5s ease-in-out infinite reverse; }
+@keyframes heroReveal { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* ----------------------- Abonnements et souscription ---------------------- */
+.pricing-intro { padding: 20px 0 8px; }
+.pricing-intro h2 { margin-top: 12px; font-size: clamp(23px, 3vw, 30px); }
+.pricing-intro p { margin-top: 9px; max-width: 680px; }
+.subscription-grid { align-items: stretch; }
+.subscription-plan { position: relative; min-width: 0; padding: 24px; border-radius: 20px; gap: 13px; overflow: hidden; }
+.subscription-plan.featured { border: 2px solid var(--primary); box-shadow: 0 18px 42px rgba(15, 118, 110, .13); }
+.subscription-duration { font-size: 17px; font-weight: 750; color: var(--primary-dark); }
+.subscription-plan .price { margin: 0; text-align: left; font-size: clamp(27px, 3vw, 34px); }
+.subscription-note { color: var(--muted); font-size: 13px; min-height: 38px; }
+.subscription-ribbon { align-self: flex-start; border-radius: 999px; padding: 5px 10px; background: var(--primary-soft); color: var(--primary-dark); font-size: 11px; font-weight: 750; }
+.subscription-plan ul { margin-top: 4px; }
+.subscription-plan li { font-size: 13.5px; }
+.free-plan { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; }
+.checkout-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
+.checkout-summary { padding: 24px; background: linear-gradient(145deg, #F0F8F6, #FFFFFF); }
+.checkout-summary h2 { margin-top: 12px; }
+.checkout-amount { margin: 20px 0 8px; color: var(--primary-dark); font-size: 34px; font-weight: 850; letter-spacing: -1px; }
+.checkout-layout .card { border-radius: 20px; }
+.checkout-layout .banner { align-items: flex-start; }
+#checkoutFeedback { line-height: 1.55; }
+
+/* -------------------------------- Footer premium ------------------------- */
+.lp-footer { margin-top: 0; padding: 48px 0 24px; background: #0F2428; border-top: 0; color: #E2ECEB; }
+.lp-footer .footer-main { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 34px; padding-bottom: 32px; }
+.lp-footer .lp-logo { color: #fff; }
+.lp-footer .footer-brand p { max-width: 310px; margin-top: 14px; color: #B8CBC8; font-size: 13.5px; line-height: 1.7; }
+.lp-footer .footer-tag { display: inline-flex; margin-top: 18px; padding: 7px 11px; border-radius: 999px; background: rgba(255,255,255,.08); color: #C9E6E0; font-size: 11.5px; font-weight: 650; }
+.lp-footer .footer-links h4 { margin: 4px 0 13px; color: #fff; font-size: 12px; letter-spacing: .9px; }
+.lp-footer .footer-links a { padding: 6px 0; color: #B8CBC8; font-size: 13px; transition: color .15s ease, transform .15s ease; }
+.lp-footer .footer-links a:hover { color: #fff; transform: translateX(3px); text-decoration: none; }
+.lp-footer .bottom { margin-top: 0; padding-top: 18px; border-color: rgba(255,255,255,.14); color: #AFC2BF; }
+.lp-footer .footer-trust { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
+
+@media (max-width: 767px) {
+  .hero { padding: 36px 0 30px; }
+  .hero h1 { font-size: 35px; }
+  .hero .lead { font-size: 15.5px; }
+  .hero-cta { flex-direction: column; }
+  .hero-cta .btn { width: 100%; }
+  .hero-visual { margin: 12px 8px 70px; }
+  .hero-photo { aspect-ratio: 1 / 1.08; object-position: 50% 38%; }
+  .hero-visual-phone { left: -8px; bottom: -46px; width: 126px; }
+  .hero-badge { right: -6px; bottom: 8px; max-width: 190px; padding: 8px 10px; font-size: 11px; }
+  .hero-badge .hb-ico { width: 26px; height: 26px; flex-basis: 26px; }
+  .free-plan { align-items: stretch; flex-direction: column; }
+  .free-plan .btn { width: 100%; }
+  .checkout-layout { grid-template-columns: 1fr; }
+  .lp-footer { padding-top: 34px; }
+  .lp-footer .footer-main { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 24px 18px; }
+  .lp-footer .footer-brand { grid-column: 1 / -1; }
+  .lp-footer .bottom { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 380px) {
+  .lp-footer .footer-main { grid-template-columns: 1fr; }
+  .lp-footer .footer-brand { grid-column: auto; }
+}
