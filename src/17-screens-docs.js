@@ -351,7 +351,7 @@
       const actions = B.el('<div class="btn-row mt-12"></div>');
       const addCatalog = B.el('<button class="btn btn-primary">' + ui().icon('plus', 17) + ' Ajouter un matériel</button>');
       addCatalog.addEventListener('click', async function () {
-        const picked = await C().catalogPicker();
+        const picked = await C().catalogPicker({ manualPricing: true });
         if (!picked) return;
         state.doc.lines.push({
           id: B.uid('li'), catalog_item_id: picked.item.id, description: picked.item.name,
