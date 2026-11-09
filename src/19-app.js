@@ -273,13 +273,12 @@
           '<span class="footer-tag">Conçu pour le terrain</span>' +
           '<p class="footer-founder">Fondé par <strong>Sotodi Vainqueur</strong>.</p></div>' +
         '<div class="footer-links"><h4>BATIYO</h4>' +
-          '<a href="#/pricing">Nos abonnements</a>' +
-          '<a class="btn btn-primary btn-block footer-subscribe-link" href="#/pricing">Prendre un abonnement</a>' +
-          '<a href="#/">Page d’accueil</a></div>' +
-        '<div class="footer-links"><h4>Mon espace</h4>' +
-          '<a href="#/quotes">Mes devis</a><a href="#/invoices">Mes factures</a><a href="#/projects">Mes chantiers</a><a href="#/clients">Mes clients</a></div>' +
-        '<div class="footer-links"><h4>Accompagnement et informations</h4>' +
+          '<a href="#/">Page d’accueil</a><a href="#/pricing">Nos abonnements</a>' +
+          '<a class="btn btn-primary btn-block footer-subscribe-link" href="#/pricing">Prendre un abonnement</a></div>' +
+        '<div class="footer-links"><h4>Accompagnement et espace</h4>' +
           '<a href="#/faq">Questions fréquentes</a><a href="#/profile">Mon profil</a><a href="#/settings">Paramètres</a>' +
+          '<a href="#/quotes">Mes devis</a><a href="#/invoices">Mes factures</a><a href="#/projects">Mes chantiers</a><a href="#/clients">Mes clients</a></div>' +
+        '<div class="footer-links"><h4>Informations</h4>' +
           '<a href="#/legal/terms">Conditions d’utilisation</a><a href="#/legal/privacy">Confidentialité</a><a href="#/legal/notice">Mentions légales</a></div>' +
       '</div><div class="bottom"><div>© ' + new Date().getFullYear() + ' BATIYO. Tous droits réservés.</div>' +
       '<div class="footer-trust">Utilisable hors connexion <span>•</span> Vos données restent protégées</div></div></div>';
