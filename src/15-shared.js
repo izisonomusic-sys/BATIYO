@@ -204,11 +204,11 @@
   function catalogPicker(opts) {
     const o = opts || {};
     return new Promise(function (resolve) {
-      const m = ui().modal({ title: "Ajouter un élément", size: 'wide' });
+      const m = ui().modal({ title: o.manualPricing ? "Choisir un matériel" : "Ajouter un élément", size: 'wide' });
       const body = B.el('<div class="stack"></div>');
       const prof = B.session.profession();
       const head = B.el('<div class="banner banner-info">' + ui().icon('sparkles', 18) +
-        '<span>Catalogue <strong>' + h(prof.name) + '</strong> — adapté à votre métier.</span></div>');
+        '<span>' + (o.manualPricing ? 'Matériels du catalogue <strong>' + h(prof.name) + '</strong> — choisissez un matériel à ajouter au devis.' : 'Catalogue <strong>' + h(prof.name) + '</strong> — adapté à votre métier.') + '</span></div>');
       body.appendChild(head);
       const search = B.el('<div class="search">' + ui().icon('search', 18) + '<input placeholder="Rechercher : ciment, sable, fer…" aria-label="Rechercher un article"></div>');
       body.appendChild(search);
@@ -219,7 +219,7 @@
       body.appendChild(chips);
       const list = B.el('<div class="stack-sm"></div>');
       body.appendChild(list);
-      const createBtn = B.el('<button class="btn btn-ghost btn-block">' + ui().icon('plus', 18) + ' Créer un nouvel article</button>');
+      const createBtn = B.el('<button class="btn btn-ghost btn-block">' + ui().icon('plus', 18) + ' ' + (o.manualPricing ? 'Créer un nouveau matériel' : 'Créer un nouvel article') + '</button>');
       body.appendChild(createBtn);
       m.body.appendChild(body);
       if (m.foot) m.foot.remove();
@@ -237,16 +237,15 @@
           return;
         }
         rows.forEach(function (it) {
-          const sugg = B.catalogService.suggestedPrice(it.id);
+          const sugg = o.manualPricing ? null : B.catalogService.suggestedPrice(it.id);
           const row = B.el('<button class="picker-item"></button>');
           row.innerHTML = '<div class="avatar" style="width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:var(--primary-soft);color:var(--primary-dark)">' + ui().icon(it.favorite ? 'star' : 'box', 17) + '</div>' +
-            '<div class="grow"><div class="strong small">' + h(it.name) + '</div>' +
-            '<div class="tiny muted">' + h(B.catalogCategory(it.category).label) + ' · ' + h(B.unitLabel(it.unit)) +
-            (sugg.source === 'last' ? ' · <span class="price-flag">Prix habituel</span>' : '') + '</div></div>' +
-            '<div class="price"><div class="strong mono">' + B.money(sugg.price) + '</div><div class="tiny muted">' + (sugg.source === 'last' ? 'dernier prix' : 'prix catalogue') + '</div></div>';
+            (o.manualPricing
+              ? '<div class="grow"><div class="strong small">' + h(it.name) + '</div></div>' + ui().icon('plus', 16)
+              : '<div class="grow"><div class="strong small">' + h(it.name) + '</div><div class="tiny muted">' + h(B.catalogCategory(it.category).label) + ' · ' + h(B.unitLabel(it.unit)) + (sugg.source === 'last' ? ' · <span class="price-flag">Prix habituel</span>' : '') + '</div></div><div class="price"><div class="strong mono">' + B.money(sugg.price) + '</div><div class="tiny muted">' + (sugg.source === 'last' ? 'dernier prix' : 'prix catalogue') + '</div></div>');
           row.addEventListener('click', function () {
             m.close();
-            resolve({ item: it, price: sugg.price, unit: it.unit, name: it.name, source: sugg.source });
+            resolve({ item: it, price: o.manualPricing ? 0 : sugg.price, unit: o.manualPricing ? '' : it.unit, name: it.name, source: o.manualPricing ? 'catalog' : sugg.source });
           });
           list.appendChild(row);
         });
@@ -263,7 +262,7 @@
       createBtn.addEventListener('click', function () {
         m.close();
         catalogItemForm(null, function (created) {
-          if (created) resolve({ item: created, price: created.last_price != null ? created.last_price : created.default_price, unit: created.unit, name: created.name, source: 'catalog' });
+          if (created) resolve({ item: created, price: o.manualPricing ? 0 : (created.last_price != null ? created.last_price : created.default_price), unit: o.manualPricing ? '' : created.unit, name: created.name, source: 'catalog' });
         });
       });
       m.onClose = function () { resolve(null); };
@@ -321,7 +320,7 @@
         <div><label class="tiny muted" for="q_${line.id}">Quantité</label>
           <input class="input" id="q_${line.id}" data-q type="number" min="0" step="0.01" value="${line.quantity != null ? line.quantity : 1}" inputmode="decimal"></div>
         <div><label class="tiny muted" for="u_${line.id}">Unité</label>
-          <select class="select" id="u_${line.id}" data-u>${B.UNITS.map(function (u) { return '<option value="' + u.id + '"' + (line.unit === u.id ? ' selected' : '') + '>' + h(u.label) + '</option>'; }).join('')}</select></div>
+          <select class="select" id="u_${line.id}" data-u><option value="">Choisir une unité</option>${B.UNITS.map(function (u) { return '<option value="' + u.id + '"' + (line.unit === u.id ? ' selected' : '') + '>' + h(u.label) + '</option>'; }).join('')}</select></div>
         <div><label class="tiny muted" for="p_${line.id}">Prix unitaire (FCFA)</label>
           <input class="input money-input" id="p_${line.id}" data-p inputmode="numeric" value="${line.unit_price ? B.num(line.unit_price) : ''}" data-raw="${line.unit_price || ''}"></div>
       </div>
