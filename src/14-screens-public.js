@@ -412,38 +412,36 @@
   }
 
   /* --------------------------------- Connexion ---------------------------- */
+  function passwordField(label, name, placeholder, autocomplete) {
+    const field = ui().field({ label: label, name: name, type: 'password', required: true, placeholder: placeholder, autocomplete: autocomplete });
+    field.style.position = 'relative';
+    field._input.style.paddingRight = '82px';
+    const toggle = B.el('<button type="button" class="btn btn-ghost btn-sm" aria-label="Afficher le mot de passe" style="position:absolute;right:6px;top:31px;padding:6px 9px;min-height:30px">Afficher</button>');
+    toggle.addEventListener('click', function () {
+      const visible = field._input.type === 'password';
+      field._input.type = visible ? 'text' : 'password';
+      toggle.textContent = visible ? 'Masquer' : 'Afficher';
+      toggle.setAttribute('aria-label', visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    });
+    field.appendChild(toggle);
+    return field;
+  }
+
+  /* --------------------------------- Connexion ---------------------------- */
   function login() {
     return authLayout({
       title: 'Content de vous revoir',
-      subtitle: 'Connectez-vous pour retrouver vos devis, vos chantiers et vos dépenses.',
+      subtitle: 'Connectez-vous avec votre numéro de téléphone et votre mot de passe.',
       form: function (form) {
-        form.appendChild(ui().field({ label: 'Adresse email', name: 'email', type: 'email', placeholder: 'vous@exemple.tg', required: true, autocomplete: 'username' }));
-        form.appendChild(ui().field({ label: 'Mot de passe', name: 'password', type: 'password', placeholder: '••••••••', required: true, autocomplete: 'current-password' }));
-        const forgot = B.el('<button type="button" class="btn btn-ghost btn-sm" style="align-self:flex-start">Mot de passe oublié ?</button>');
-        forgot.addEventListener('click', function () {
-          const body = B.el('<div></div>');
-          const form = B.el('<form class="form-grid" data-reset-form></form>');
-          form.appendChild(ui().field({ label: 'Adresse email', name: 'email', type: 'email', required: true, placeholder: 'vous@exemple.tg' }));
-          body.appendChild(form);
-          const hint = B.el('<div class="tiny muted mt-8">Un lien de réinitialisation sera envoyé à votre adresse email.</div>');
-          body.appendChild(hint);
-          const modal = ui().modal({ title: 'Mot de passe oublié', body: body });
-          const send = B.el('<button class="btn btn-primary">Envoyer le lien</button>');
-          send.addEventListener('click', async function () {
-            const email = B.$('[name="email"]', form).value;
-            const res = await B.authService.resetPassword(email);
-            if (res.ok) { ui().toast(res.message, 'success'); modal.close(); }
-            else ui().toast(res.error, 'error');
-          });
-          modal.foot.appendChild(send);
-          form.addEventListener('submit', function (e) { e.preventDefault(); send.click(); });
-        });
-        form.appendChild(forgot);
+        form.appendChild(ui().field({ label: 'Numéro de téléphone', name: 'phone', type: 'tel', placeholder: '+228 90 12 34 56', required: true, autocomplete: 'tel' }));
+        form.appendChild(passwordField('Mot de passe', 'password', 'Votre mot de passe', 'current-password'));
+        const help = B.el('<div class="tiny muted">Utilisez votre numéro avec l’indicatif international (ex. +228 pour le Togo).</div>');
+        form.appendChild(help);
         return {
           submitLabel: 'Se connecter',
           onSubmit: async function (values, scope) {
-            const res = await B.authService.login(values.email, values.password);
-            if (!res.ok) { ui().showErrors(scope, { email: res.error }); ui().toast(res.error, 'error'); return; }
+            const res = await B.authService.login(values.phone, values.password);
+            if (!res.ok) { ui().showErrors(scope, { phone: res.error }); ui().toast(res.error, 'error'); return; }
             ui().toast('Bonjour ' + (res.user && res.user.name ? res.user.name : '') + ', ravi de vous revoir.', 'success');
             B.router.go('/dashboard');
           }
@@ -457,18 +455,18 @@
     const selected = { profession_id: null };
     const wrap = B.el('<div></div>');
     wrap.appendChild(authLayout({
-      title: 'Parlons de votre activité',
-      subtitle: 'Créez votre compte. Votre métier déterminera automatiquement votre catalogue.',
+      title: 'Créez votre compte BATIYO',
+      subtitle: 'Quelques informations suffisent pour commencer à gérer votre activité.',
       wide: true,
       form: function (form) {
-        form.appendChild(ui().field({ label: 'Votre nom', name: 'name', required: true, placeholder: 'Ex : Kossi Amégan', autocomplete: 'name' }));
-        form.appendChild(ui().field({ label: 'Adresse email', name: 'email', type: 'email', required: true, placeholder: 'Ex : vous@exemple.tg', autocomplete: 'email' }));
-        form.appendChild(ui().field({ label: 'Téléphone', name: 'phone', type: 'tel', required: false, placeholder: 'Ex : +228 90 12 34 56' }));
-        form.appendChild(ui().field({ label: 'Mot de passe', name: 'password', type: 'password', required: true, placeholder: '6 caractères minimum', autocomplete: 'new-password' }));
-        form.appendChild(ui().field({ label: 'Nom de l’entreprise', name: 'business_name', required: true, placeholder: 'Ex : Batiyo Construction' }));
+        form.appendChild(ui().field({ label: 'Prénom', name: 'first_name', required: true, placeholder: 'Ex. : Kossi', autocomplete: 'given-name' }));
+        form.appendChild(ui().field({ label: 'Nom', name: 'last_name', required: true, placeholder: 'Ex. : Amégan', autocomplete: 'family-name' }));
+        form.appendChild(ui().field({ label: 'Numéro de téléphone', name: 'phone', type: 'tel', required: true, placeholder: '+228 90 12 34 56', autocomplete: 'tel', hint: 'Avec indicatif international, sans adresse e-mail et sans code SMS.' }));
+        form.appendChild(passwordField('Mot de passe', 'password', '6 caractères minimum', 'new-password'));
+        form.appendChild(ui().field({ label: 'Nom de l’entreprise', name: 'business_name', required: true, placeholder: 'Ex. : Batiyo Construction' }));
 
         const profField = B.el('<div class="field"><label>Quel est votre métier ? <span style="color:#DC2626">*</span></label>' +
-          '<div class="tiny muted">Le métier est obligatoire : il détermine le catalogue proposé dans vos devis.</div>' +
+          '<div class="tiny muted">Votre métier détermine le catalogue proposé dans vos devis et factures.</div>' +
           '<div class="prof-grid mt-8" data-prof></div><div class="error" data-error hidden></div></div>');
         const grid = B.$('[data-prof]', profField);
         B.PROFESSIONS.forEach(function (p) {
@@ -484,31 +482,29 @@
         form.appendChild(profField);
 
         return {
-          submitLabel: 'Créer mon espace',
+          submitLabel: 'Créer mon compte',
           onSubmit: async function (values, scope) {
             const res = await B.authService.register({
-              name: values.name, email: values.email, phone: values.phone,
-              password: values.password, business_name: values.business_name,
+              first_name: values.first_name,
+              last_name: values.last_name,
+              phone: values.phone,
+              password: values.password,
+              business_name: values.business_name,
               profession_id: selected.profession_id
             });
             if (!res.ok) {
-              const errors = Object.assign({}, res.errors || { email: res.error });
-              if (res.error && !res.errors) errors.email = res.error;
+              const errors = Object.assign({}, res.errors || { phone: res.error });
+              if (res.error && !res.errors) errors.phone = res.error;
               if (errors.profession_id) {
                 const e = B.$('.error', profField); e.textContent = errors.profession_id; e.hidden = false;
                 delete errors.profession_id;
               }
               ui().showErrors(scope, errors);
-              ui().toast('Vérifiez les informations saisies.', 'error');
+              ui().toast(res.error || 'Vérifiez les informations saisies.', 'error');
               return;
             }
-            if (res.pendingVerification) {
-              ui().toast('Compte créé. Vérifiez votre email pour confirmer votre adresse, puis connectez-vous.', 'info', { duration: 7000 });
-              B.router.go('/login');
-              return;
-            }
-            ui().toast('Compte créé. Bienvenue !', 'success');
-            B.router.go('/onboarding');
+            ui().toast('Votre compte est créé. Bienvenue sur BATIYO !', 'success');
+            B.router.go('/dashboard');
           }
         };
       }
