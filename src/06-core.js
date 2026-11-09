@@ -212,6 +212,30 @@
     }
   };
 
+  /* -------------------- Quotas documents / abonnement ------------------- */
+  B.entitlementService = {
+    checkDocumentExport: async function (type, documentId) {
+      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) {
+        return { allowed: false, reason: 'offline', message: 'Connectez-vous à Internet pour vérifier votre quota avant le téléchargement ou le partage.' };
+      }
+      try {
+        const res = await B.DataRepository.remote.rpc('can_export_document', { p_document_type: type, p_document_id: documentId });
+        if (res.error) throw res.error;
+        return res.data || { allowed: false, reason: 'unknown' };
+      } catch (e) {
+        return { allowed: false, reason: 'check_failed', message: 'Impossible de vérifier votre quota. Réessayez lorsque la connexion sera rétablie.' };
+      }
+    },
+    requireDocumentExport: async function (type, doc) {
+      const result = await B.entitlementService.checkDocumentExport(type, doc && doc.id);
+      if (result.allowed) return true;
+      const message = result.message || 'Votre essai gratuit de 10 ' + (type === 'quote' ? 'devis' : 'factures') + ' est terminé. Choisissez un abonnement pour télécharger ou partager ce document.';
+      if (typeof window !== 'undefined' && window.alert) window.alert(message);
+      if (B.router) B.router.go('/pricing');
+      return false;
+    }
+  };
+
   /* ------------------------- profileService (#90) ------------------------- */
   B.profileService = {
     get: function () { return B.session.profile(); },
