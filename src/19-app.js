@@ -265,6 +265,21 @@
     /* Insertion de la vue */
     B.$('#view', shell).appendChild(view);
     const main = B.$('.main', shell);
+    const appFooter = B.el('<footer class="lp-footer app-footer"></footer>');
+    appFooter.innerHTML = '<div class="container">' +
+      '<div class="footer-main">' +
+        '<div class="footer-brand"><a href="#/dashboard" class="lp-logo">' + B.screens.logoMark() + ' BATIYO</a>' +
+          '<p>Le compagnon de chantier des artisans et petites entreprises. Des devis clairs, des dépenses suivies et une activité mieux maîtrisée.</p>' +
+          '<span class="footer-tag">Conçu pour le terrain</span></div>' +
+        '<div class="footer-links"><h4>Mon activité</h4>' +
+          '<a href="#/quotes">Mes devis</a><a href="#/invoices">Mes factures</a><a href="#/projects">Mes chantiers</a><a href="#/clients">Mes clients</a></div>' +
+        '<div class="footer-links"><h4>Accompagnement</h4>' +
+          '<a href="#/faq">Questions fréquentes</a><a href="#/profile">Mon profil</a><a href="#/settings">Paramètres</a></div>' +
+        '<div class="footer-links"><h4>Informations</h4>' +
+          '<a href="#/legal/terms">Conditions d’utilisation</a><a href="#/legal/privacy">Confidentialité</a><a href="#/legal/notice">Mentions légales</a></div>' +
+      '</div><div class="bottom"><div>© ' + new Date().getFullYear() + ' BATIYO. Tous droits réservés.</div>' +
+      '<div class="footer-trust">Utilisable hors connexion <span>•</span> Vos données restent protégées</div></div></div>';
+    main.appendChild(appFooter);
     main.appendChild(bottom);
     main.appendChild(fab);
     ui().bindMoneyInputs(shell);
