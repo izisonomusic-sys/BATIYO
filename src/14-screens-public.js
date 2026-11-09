@@ -707,7 +707,7 @@
       '<div class="field"><label for="subscriberPhone">Numéro de téléphone</label><input class="input" id="subscriberPhone" name="phone" type="tel" autocomplete="tel" placeholder="+228 90 12 34 56" required><span class="hint" id="subscriberPhoneHint">Avec l’indicatif du pays sélectionné.</span></div>' +
       '<div class="field" id="subscriberAddressField"><label for="subscriberAddress">Ville / adresse (si demandé par l’opérateur)</label><input class="input" id="subscriberAddress" name="address" type="text" autocomplete="street-address" placeholder="Ex. : Lomé"></div>' +
       '<div class="field" id="subscriberOtpField" hidden><label for="subscriberOtp">Code de paiement OTP</label><input class="input" id="subscriberOtp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Code obtenu auprès de votre opérateur"><span class="hint">Ne saisissez ici que le code de paiement généré par l’opérateur, jamais votre code secret Mobile Money.</span></div>' +
-      '<div class="banner banner-info"><span>' + ui().icon('smartphone', 18) + '</span><span>Les paiements ne sont disponibles que dans les pays et pour les opérateurs activés sur votre compte PayDunya Business. Aucun abonnement ne sera activé avant confirmation par notification sécurisée.</span></div>' +
+      '<div class="banner banner-info"><span>' + ui().icon('smartphone', 18) + '</span><span>Votre abonnement BATIYO sera activé dès que le paiement aura été confirmé par PayDunya.</span></div>' +
       '<button class="btn btn-primary btn-lg btn-block" type="submit">Lancer le paiement sécurisé</button>' +
       '<p id="checkoutFeedback" class="tiny muted" role="status">Connectez-vous à votre compte BATIYO avant de payer.</p></form></section></div>' +
       '<div class="center mt-16"><a href="#/pricing" class="btn btn-ghost btn-sm">' + ui().icon('arrowLeft', 15) + ' Changer de formule</a></div>', true);
@@ -786,7 +786,21 @@
             otp: String(otpInput.value || '').trim()
           }
         });
-        if (result.error) throw new Error((result.data && result.data.message) || result.error.message || 'Le service de paiement a retourné une erreur.');
+        if (result.error) {
+          let errorData = result.data || null;
+          const errorResponse = result.error.context;
+          if (!errorData && errorResponse && typeof errorResponse.clone === 'function') {
+            try { errorData = await errorResponse.clone().json(); } catch (_) { /* réponse non JSON */ }
+          }
+          const errorCode = errorData && errorData.error;
+          if (errorCode === 'unsupported_country_or_operator') {
+            throw new Error('Le paiement n’a pas pu être lancé. Veuillez choisir un autre moyen de paiement ou contacter le support BATIYO.');
+          }
+          if (errorCode === 'softpay_operator_sandbox_unavailable') {
+            throw new Error('Le paiement Mobile Money n’est pas activé en mode production. Vérifiez PAYDUNYA_MODE=live dans les secrets Supabase.');
+          }
+          throw new Error((errorData && errorData.message) || result.error.message || 'Le service de paiement a retourné une erreur.');
+        }
         const data = result.data || {};
         if (!data.success) throw new Error(data.message || data.error || 'Impossible de lancer le paiement.');
         feedback.className = 'banner banner-info';
@@ -803,7 +817,7 @@
         }
       } catch (error) {
         feedback.className = 'banner banner-warn';
-        feedback.textContent = error.message || 'Le paiement n’a pas pu être initialisé. Vérifiez la configuration PayDunya.';
+        feedback.textContent = error.message || 'Le paiement n’a pas pu être initialisé. Votre abonnement sera activé uniquement après confirmation effective du paiement.';
       } finally {
         submit.disabled = false;
         submit.textContent = 'Lancer le paiement sécurisé';
