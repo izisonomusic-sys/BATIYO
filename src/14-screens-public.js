@@ -661,41 +661,153 @@
       '<div>' + faqItem('Est-ce que je perds mes documents si mon abonnement expire ?', 'Non. Vos devis, factures et autres données restent conservés. Les droits Pro restent actifs pendant la période de grâce de 7 jours après expiration.') + '</div></div>', true);
   }
 
+  const PAYDUNYA_COUNTRIES = [
+    { code: 'TG', name: 'Togo', prefix: '+228', operators: [
+      ['t-money-togo', 'T-Money'], ['moov-togo', 'Moov Togo']
+    ] },
+    { code: 'BJ', name: 'Bénin', prefix: '+229', operators: [
+      ['moov-benin', 'Moov'], ['mtn-benin', 'MTN'], ['celtiis-cash', 'Celtiis Cash']
+    ] },
+    { code: 'CI', name: "Côte d’Ivoire", prefix: '+225', operators: [
+      ['mtn-ci', 'MTN Money'], ['moov-ci', 'Moov Money'], ['wave-ci', 'Wave'],
+      ['orange-money-ci', 'Orange Money (code OTP)'], ['djamo-ci', 'Djamo']
+    ] },
+    { code: 'SN', name: 'Sénégal', prefix: '+221', operators: [
+      ['free-money-senegal', 'Free Money'], ['expresso-senegal', 'Expresso'],
+      ['wave-senegal', 'Wave'], ['new-orange-money-senegal', 'Orange Money (application)'],
+      ['djamo-sn', 'Djamo']
+    ] },
+    { code: 'BF', name: 'Burkina Faso', prefix: '+226', operators: [
+      ['moov-burkina', 'Moov'], ['orange-money-burkina', 'Orange Money (code OTP)']
+    ] },
+    { code: 'ML', name: 'Mali', prefix: '+223', operators: [
+      ['orange-money-mali', 'Orange Money'], ['moov-mali', 'Moov']
+    ] }
+  ];
+
   function subscribe(planId) {
     const selected = SUBSCRIPTION_PLANS.find(function (p) { return p.id === planId; });
     if (!selected) return pricing();
-    const wrap = publicPage('Finaliser mon abonnement', 'Vérifiez la formule choisie et renseignez vos coordonnées.',
+    const countryOptions = PAYDUNYA_COUNTRIES.map(function (c) {
+      return '<option value="' + c.code + '"' + (c.code === 'TG' ? ' selected' : '') + '>' + h(c.name) + '</option>';
+    }).join('');
+    const wrap = publicPage('Finaliser mon abonnement', 'BATIYO accompagne les artisans dans les pays d’Afrique de l’Ouest. Choisissez votre pays et le moyen de paiement disponible.',
       '<div class="checkout-layout mt-24"><section class="card checkout-summary">' +
       '<span class="eyebrow">Votre formule</span><h2>BATIYO Pro — ' + h(selected.name) + '</h2>' +
       '<div class="checkout-amount">' + h(selected.price) + '</div><p class="muted small">' + h(selected.duration) + ' d’accès Pro à compter de la confirmation du paiement.</p>' +
       '<div class="divider"></div><div class="row-between"><span class="muted small">Abonnement</span><strong>' + h(selected.name) + '</strong></div>' +
-      '<div class="row-between mt-8"><span class="muted small">Montant à payer</span><strong>' + h(selected.price) + '</strong></div></section>' +
-      '<section class="card card-pad-lg"><h2>Vos coordonnées</h2><p class="muted small mt-8">Le numéro indiqué sera utilisé pour le paiement mobile et les instructions de confirmation.</p>' +
+      '<div class="row-between mt-8"><span class="muted small">Montant à payer</span><strong>' + h(selected.price) + '</strong></div>' +
+      '<p class="tiny muted mt-12">Montant affiché en FCFA (XOF). Les moyens proposés dépendent du pays et de l’activation de votre compte marchand.</p></section>' +
+      '<section class="card card-pad-lg"><h2>Vos coordonnées</h2><p class="muted small mt-8">Le paiement est lancé depuis BATIYO via PayDunya SoftPay. Selon l’opérateur, une validation sur votre téléphone ou dans son application peut être nécessaire.</p>' +
       '<form id="subscriptionForm" class="form-grid mt-16" novalidate>' +
       '<div class="field"><label for="subscriberName">Nom et prénom</label><input class="input" id="subscriberName" name="name" type="text" autocomplete="name" placeholder="Ex. : Kossi Amégan" required></div>' +
-      '<div class="field"><label for="subscriberPhone">Numéro de téléphone</label><input class="input" id="subscriberPhone" name="phone" type="tel" autocomplete="tel" placeholder="+228 90 12 34 56" required><span class="hint">Avec l’indicatif du pays, par exemple +228 pour le Togo.</span></div>' +
-      '<div class="banner banner-info"><span>' + ui().icon('smartphone', 18) + '</span><span>Paiement par Mobile Money. Vous recevrez une demande de validation sur votre téléphone lorsque le service marchand sera connecté.</span></div>' +
-      '<button class="btn btn-primary btn-lg btn-block" type="submit">Continuer vers le paiement</button>' +
-      '<p id="checkoutFeedback" class="tiny muted" role="status">Aucun paiement ne sera lancé sans confirmation réelle du service de paiement.</p></form></section></div>' +
+      '<div class="field"><label for="subscriberEmail">Adresse e-mail</label><input class="input" id="subscriberEmail" name="email" type="email" autocomplete="email" placeholder="vous@exemple.com" required></div>' +
+      '<div class="field"><label for="subscriberCountry">Pays</label><select class="input" id="subscriberCountry" name="country" required>' + countryOptions + '</select><span class="hint">PayDunya SoftPay annonce actuellement ces six pays.</span></div>' +
+      '<div class="field"><label for="subscriberOperator">Moyen de paiement</label><select class="input" id="subscriberOperator" name="operator" required></select></div>' +
+      '<div class="field"><label for="subscriberPhone">Numéro de téléphone</label><input class="input" id="subscriberPhone" name="phone" type="tel" autocomplete="tel" placeholder="+228 90 12 34 56" required><span class="hint" id="subscriberPhoneHint">Avec l’indicatif du pays sélectionné.</span></div>' +
+      '<div class="field" id="subscriberAddressField"><label for="subscriberAddress">Ville / adresse (si demandé par l’opérateur)</label><input class="input" id="subscriberAddress" name="address" type="text" autocomplete="street-address" placeholder="Ex. : Lomé"></div>' +
+      '<div class="field" id="subscriberOtpField" hidden><label for="subscriberOtp">Code de paiement OTP</label><input class="input" id="subscriberOtp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Code obtenu auprès de votre opérateur"><span class="hint">Ne saisissez ici que le code de paiement généré par l’opérateur, jamais votre code secret Mobile Money.</span></div>' +
+      '<div class="banner banner-info"><span>' + ui().icon('smartphone', 18) + '</span><span>Les paiements ne sont disponibles que dans les pays et pour les opérateurs activés sur votre compte PayDunya Business. Aucun abonnement ne sera activé avant confirmation par notification sécurisée.</span></div>' +
+      '<button class="btn btn-primary btn-lg btn-block" type="submit">Lancer le paiement sécurisé</button>' +
+      '<p id="checkoutFeedback" class="tiny muted" role="status">Connectez-vous à votre compte BATIYO avant de payer.</p></form></section></div>' +
       '<div class="center mt-16"><a href="#/pricing" class="btn btn-ghost btn-sm">' + ui().icon('arrowLeft', 15) + ' Changer de formule</a></div>', true);
     const form = B.$('#subscriptionForm', wrap);
     const feedback = B.$('#checkoutFeedback', wrap);
-    form.addEventListener('submit', function (event) {
+    const countryInput = B.$('#subscriberCountry', form);
+    const operatorInput = B.$('#subscriberOperator', form);
+    const phoneInput = B.$('#subscriberPhone', form);
+    const otpField = B.$('#subscriberOtpField', form);
+    const otpInput = B.$('#subscriberOtp', form);
+    const submit = B.$('button[type="submit"]', form);
+
+    function selectedCountry() {
+      return PAYDUNYA_COUNTRIES.find(function (c) { return c.code === countryInput.value; }) || PAYDUNYA_COUNTRIES[0];
+    }
+    function paintOperators() {
+      const country = selectedCountry();
+      operatorInput.innerHTML = country.operators.map(function (op, i) {
+        return '<option value="' + op[0] + '"' + (i === 0 ? ' selected' : '') + '>' + h(op[1]) + '</option>';
+      }).join('');
+      phoneInput.placeholder = country.prefix + ' ...';
+      B.$('#subscriberPhoneHint', form).textContent = 'Indicatif attendu : ' + country.prefix + '. Saisissez votre numéro avec cet indicatif.';
+      paintOtp();
+    }
+    function paintOtp() {
+      const needsOtp = ['orange-money-ci', 'orange-money-burkina'].indexOf(operatorInput.value) >= 0;
+      otpField.hidden = !needsOtp;
+      otpInput.required = needsOtp;
+    }
+    countryInput.addEventListener('change', paintOperators);
+    operatorInput.addEventListener('change', paintOtp);
+    paintOperators();
+
+    form.addEventListener('submit', async function (event) {
       event.preventDefault();
       const name = String(B.$('#subscriberName', form).value || '').trim();
-      const phone = String(B.$('#subscriberPhone', form).value || '').replace(/[\s().-]/g, '').replace(/^00/, '+');
-      if (name.length < 2) {
-        feedback.className = 'tiny tone-danger';
-        feedback.textContent = 'Veuillez renseigner votre nom et prénom.';
+      const email = String(B.$('#subscriberEmail', form).value || '').trim();
+      const country = selectedCountry();
+      const phone = String(phoneInput.value || '').replace(/[\s().-]/g, '').replace(/^00/, '+');
+      const operator = operatorInput.value;
+      if (!B.session || !B.session.isLoggedIn()) {
+        feedback.className = 'banner banner-warn';
+        feedback.textContent = 'Connectez-vous ou créez votre compte BATIYO avant de lancer un paiement.';
         return;
       }
-      if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+      if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         feedback.className = 'tiny tone-danger';
-        feedback.textContent = 'Saisissez un numéro au format international, par exemple +22890123456.';
+        feedback.textContent = 'Veuillez renseigner un nom et une adresse e-mail valides.';
         return;
       }
-      feedback.className = 'banner banner-warn';
-      feedback.textContent = 'Vos coordonnées sont valides, mais le paiement n’est pas encore activé. Le compte marchand PayDunya doit être connecté avant de lancer une demande Mobile Money. Aucun débit ni SMS de validation n’a été déclenché.';
+      if (!phone.startsWith(country.prefix) || !/^\+[1-9]\d{7,14}$/.test(phone)) {
+        feedback.className = 'tiny tone-danger';
+        feedback.textContent = 'Le numéro doit être au format international et commencer par ' + country.prefix + '.';
+        return;
+      }
+      if (otpInput.required && !String(otpInput.value || '').trim()) {
+        feedback.className = 'tiny tone-danger';
+        feedback.textContent = 'Saisissez le code OTP généré par votre opérateur.';
+        return;
+      }
+      if (!B.DataRepository.remote || !B.DataRepository.remote.ready || !B.DataRepository.remote.client) {
+        feedback.className = 'banner banner-warn';
+        feedback.textContent = 'La connexion sécurisée au service de paiement est indisponible.';
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = 'Connexion au service de paiement…';
+      feedback.className = 'tiny muted';
+      feedback.textContent = 'Création de la demande de paiement sécurisée. Ne fermez pas cette page.';
+      try {
+        const result = await B.DataRepository.remote.client.functions.invoke('paydunya-softpay', {
+          body: {
+            plan_id: selected.id, country_code: country.code, operator: operator,
+            customer_name: name, email: email, phone: phone,
+            address: String(B.$('#subscriberAddress', form).value || '').trim(),
+            otp: String(otpInput.value || '').trim()
+          }
+        });
+        if (result.error) throw new Error((result.data && result.data.message) || result.error.message || 'Le service de paiement a retourné une erreur.');
+        const data = result.data || {};
+        if (!data.success) throw new Error(data.message || data.error || 'Impossible de lancer le paiement.');
+        feedback.className = 'banner banner-info';
+        feedback.textContent = data.message || 'Demande envoyée. Suivez les instructions de votre opérateur.';
+        if (data.action_url) {
+          const action = B.el('<a class="btn btn-primary btn-block mt-12" target="_blank" rel="noopener noreferrer">Ouvrir le moyen de paiement</a>');
+          action.href = data.action_url;
+          form.insertBefore(action, feedback.nextSibling);
+        }
+        if (data.action_url && data.action_label) {
+          const label = B.el('<p class="tiny muted mt-8"></p>');
+          label.textContent = data.action_label;
+          form.insertBefore(label, feedback.nextSibling);
+        }
+      } catch (error) {
+        feedback.className = 'banner banner-warn';
+        feedback.textContent = error.message || 'Le paiement n’a pas pu être initialisé. Vérifiez la configuration PayDunya.';
+      } finally {
+        submit.disabled = false;
+        submit.textContent = 'Lancer le paiement sécurisé';
+      }
     });
     return wrap;
   }

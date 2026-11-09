@@ -1,7 +1,7 @@
 {
-  "name": "BATIYO — Devis et gestion pour artisans",
+  "name": "BATIYO — Gestion des artisans en Afrique de l’Ouest",
   "short_name": "BATIYO",
-  "description": "Devis, factures, chantiers, dépenses et rentabilité pour les artisans et petites entreprises.",
+  "description": "Devis, factures, chantiers, dépenses et rentabilité pour les artisans et petites entreprises en Afrique de l’Ouest.",
   "lang": "fr",
   "start_url": "./index.html#/dashboard",
   "scope": "./",
