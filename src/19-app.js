@@ -459,6 +459,19 @@
     /* Restaurer la session Supabase et hydrater le cache local si possible. */
     if (B.DataRepository.remote && B.DataRepository.remote.ready) {
       try { await B.DataRepository.hydrate(); } catch (e) { B.bus.emit('sync:error', e); }
+      if (new URLSearchParams(location.search).get('auth') === 'google' && B.session.isLoggedIn()) {
+        try {
+          const authUser = await B.DataRepository.remote.getUser();
+          const provider = authUser && authUser.data && authUser.data.user && authUser.data.user.app_metadata
+            ? authUser.data.user.app_metadata.provider : null;
+          const localUser = B.session.user();
+          const destination = provider === 'google' && !(localUser && localUser.profession_id) ? '/onboarding' : '/dashboard';
+          history.replaceState(null, '', location.pathname + location.hash);
+          location.hash = destination;
+        } catch (e) {
+          location.hash = '/dashboard';
+        }
+      }
       B.DataRepository.remote.onAuthStateChange(function (event) {
         if (event === 'SIGNED_OUT') { B.session.logout(); }
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
