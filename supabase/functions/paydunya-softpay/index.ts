@@ -134,14 +134,39 @@ Deno.serve(async (req: Request) => {
 
   const authHeader = req.headers.get("Authorization") || "";
   const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+
+  // Supabase's newer API-key environment variables are JSON dictionaries.
+  // Keep legacy variables as first-choice fallbacks for existing projects.
+  const readDefaultKey = (jsonEnvName: string): string => {
+    try {
+      const parsed = JSON.parse(Deno.env.get(jsonEnvName) || "{}");
+      return typeof parsed?.default === "string" ? parsed.default : "";
+    } catch {
+      return "";
+    }
+  };
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || readDefaultKey("SUPABASE_PUBLISHABLE_KEYS");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || readDefaultKey("SUPABASE_SECRET_KEYS");
   const masterKey = Deno.env.get("PAYDUNYA_MASTER_KEY") || "";
   const privateKey = Deno.env.get("PAYDUNYA_PRIVATE_KEY") || "";
   const paydunyaToken = Deno.env.get("PAYDUNYA_TOKEN") || "";
-  const mode = (Deno.env.get("PAYDUNYA_MODE") || "test").toLowerCase();
-  if (!supabaseUrl || !anonKey || !serviceKey || !masterKey || !privateKey || !paydunyaToken) {
-    return json({ error: "payment_not_configured", message: "Les clés PayDunya doivent être configurées dans les secrets Supabase." }, 503);
+  const mode = (Deno.env.get("PAYDUNYA_MODE") || "test").trim().toLowerCase();
+
+  const missingConfig = [
+    ...(!supabaseUrl ? ["SUPABASE_URL"] : []),
+    ...(!anonKey ? ["SUPABASE_ANON_KEY or SUPABASE_PUBLISHABLE_KEYS.default"] : []),
+    ...(!serviceKey ? ["SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEYS.default"] : []),
+    ...(!masterKey ? ["PAYDUNYA_MASTER_KEY"] : []),
+    ...(!privateKey ? ["PAYDUNYA_PRIVATE_KEY"] : []),
+    ...(!paydunyaToken ? ["PAYDUNYA_TOKEN"] : [])
+  ];
+  if (missingConfig.length) {
+    console.error("PayDunya configuration missing:", missingConfig.join(", "));
+    return json({
+      error: "payment_not_configured",
+      missing: missingConfig,
+      message: "Configuration serveur incomplète. Consultez les noms des variables manquantes dans les paramètres Supabase."
+    }, 503);
   }
   if (mode !== "live") {
     return json({ error: "softpay_operator_sandbox_unavailable", message: "PayDunya documente le Sandbox SoftPay pour son portefeuille PayDunya, pas pour les opérateurs Mobile Money par pays. Les paiements T-Money, Moov, MTN, Orange, Wave, Free et autres opérateurs ne seront activés qu’en production après validation du compte marchand et des clés." }, 409);
