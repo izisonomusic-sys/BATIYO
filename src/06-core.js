@@ -215,16 +215,7 @@
   /* -------------------- Quotas documents / abonnement ------------------- */
   B.entitlementService = {
     checkDocumentExport: async function (type, documentId) {
-      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) {
-        return { allowed: false, reason: 'offline', message: 'Connectez-vous à Internet pour vérifier votre quota avant le téléchargement ou le partage.' };
-      }
-      try {
-        if (B.DataRepository.syncNow) await B.DataRepository.syncNow();
-        const res = await B.DataRepository.remote.rpc('can_export_document', { p_document_type: type, p_document_id: documentId });
-        if (res.error) throw res.error;
-        return res.data || { allowed: false, reason: 'unknown' };
-      } catch (e) {
-        /* Les dix premiers documents restent exportables hors connexion. */
+      function offlineFreeCheck() {
         const table = type === 'quote' ? 'quotes' : 'invoices';
         const businessId = B.session.businessId();
         const rows = (B.DataRepository.local.table(table) || [])
@@ -234,7 +225,16 @@
           });
         const rank = rows.findIndex(function (row) { return row.id === documentId; }) + 1;
         if (rank > 0 && rank <= 10) return { allowed: true, reason: 'offline_free_quota', document_rank: rank, limit: 10 };
-        return { allowed: false, reason: 'check_failed', message: 'Connectez-vous à Internet pour vérifier votre quota ou votre abonnement avant le téléchargement ou le partage.' };
+        return { allowed: false, reason: 'offline', message: 'Connectez-vous à Internet pour vérifier votre quota ou votre abonnement avant le téléchargement ou le partage.' };
+      }
+      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return offlineFreeCheck();
+      try {
+        if (B.DataRepository.syncNow) await B.DataRepository.syncNow();
+        const res = await B.DataRepository.remote.rpc('can_export_document', { p_document_type: type, p_document_id: documentId });
+        if (res.error) throw res.error;
+        return res.data || { allowed: false, reason: 'unknown' };
+      } catch (e) {
+        return offlineFreeCheck();
       }
     },
     requireDocumentExport: async function (type, doc) {
