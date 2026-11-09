@@ -582,7 +582,7 @@
       '<div class="tiny muted">' + (q.valid_until ? 'Valable jusqu’au ' + B.dateLong(q.valid_until) : '') + '</div></div></div>';
     const actions = B.el('<div class="btn-row mt-16"></div>');
     [
-      ['Télécharger le PDF', 'download', 'btn-primary', function () { B.pdf.openPreview(B.pdf.quoteHTML(q), { filename: q.number }); }],
+      ['Télécharger le PDF', 'download', 'btn-primary', function () { B.pdf.openPreview(B.pdf.quoteHTML(q), { filename: q.number, documentType: 'quote', documentId: q.id }); }],
       ['Partager sur WhatsApp', 'whatsapp', 'btn-soft', function () { C().shareDialog('quote', q); }],
       ['Modifier', 'edit', 'btn-ghost', function () { B.router.go('/quotes/' + q.id + '/edit'); }]
     ].forEach(function (a) {
@@ -818,7 +818,7 @@
       '<div class="tiny muted">Payé : ' + B.money(sum.paid) + '</div></div></div>';
     const actions = B.el('<div class="btn-row mt-16"></div>');
     [
-      ['Télécharger le PDF', 'download', 'btn-primary', function () { B.pdf.openPreview(B.pdf.invoiceHTML(inv), { filename: inv.number }); }],
+      ['Télécharger le PDF', 'download', 'btn-primary', function () { B.pdf.openPreview(B.pdf.invoiceHTML(inv), { filename: inv.number, documentType: 'invoice', documentId: inv.id }); }],
       ['Partager sur WhatsApp', 'whatsapp', 'btn-soft', function () { C().shareDialog('invoice', inv); }],
       [sum.remaining > 0 ? 'Enregistrer un paiement' : 'Paiement complet', 'wallet', 'btn-ghost', function () {
         if (sum.remaining > 0) paymentForm(inv); else ui().toast('Cette facture est entièrement payée.', 'info');
