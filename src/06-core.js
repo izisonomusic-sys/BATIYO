@@ -121,40 +121,51 @@
   B.authService = {
     register: async function (form) {
       const errors = {};
-      if (!form.name || form.name.trim().length < 2) errors.name = 'Indiquez votre nom.';
-      if (!form.email || form.email.indexOf('@') < 1) errors.email = 'Indiquez une adresse email valide.';
+      const firstName = String(form.first_name || '').trim();
+      const lastName = String(form.last_name || '').trim();
+      const phone = String(form.phone || '').replace(/[\\s().-]/g, '').replace(/^00/, '+');
+      const fullName = [firstName, lastName].filter(Boolean).join(' ');
+      if (firstName.length < 2) errors.first_name = 'Indiquez votre prénom.';
+      if (lastName.length < 2) errors.last_name = 'Indiquez votre nom.';
+      if (!/^\\+[1-9]\\d{7,14}$/.test(phone)) errors.phone = 'Saisissez le numéro au format international, par exemple +22890123456.';
       if (!form.password || form.password.length < 6) errors.password = 'Le mot de passe doit contenir au moins 6 caractères.';
       if (!form.business_name || form.business_name.trim().length < 2) errors.business_name = 'Indiquez le nom de votre entreprise.';
       if (!form.profession_id) errors.profession_id = 'Choisissez votre métier.';
       if (Object.keys(errors).length) return { ok: false, errors: errors };
-      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré. Ajoutez la clé publique du projet.' };
+      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré.' };
       try {
         const res = await B.DataRepository.remote.signUp({
-          email: form.email.trim(),
+          phone: phone,
           password: form.password,
           options: { data: {
-            name: form.name.trim(),
+            name: fullName,
+            full_name: fullName,
+            first_name: firstName,
+            last_name: lastName,
             business_name: form.business_name.trim(),
             profession_id: form.profession_id,
-            phone: form.phone || '',
-            address: form.address || ''
+            phone: phone,
+            address: null
           } }
         });
         if (res.error) return { ok: false, error: res.error.message };
         if (!res.data.session || !res.data.user) {
-          return { ok: true, pendingVerification: true, user: res.data.user || null };
+          return { ok: false, error: 'La confirmation du téléphone est encore activée dans Supabase. Pour créer le compte sans SMS, désactivez « Confirm phone » dans Authentication → Providers → Phone.' };
         }
         await B.DataRepository.hydrate();
         const user = B.session.user();
+        if (!user) return { ok: false, error: 'Compte créé, mais le profil de l’entreprise n’a pas pu être chargé. Réessayez de vous connecter.' };
         return { ok: true, user: user, session: res.data.session };
       } catch (e) {
         return { ok: false, error: e.message || 'Impossible de créer le compte.' };
       }
     },
-    login: async function (email, password) {
-      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré. Ajoutez la clé publique du projet.' };
+    login: async function (phone, password) {
+      const normalizedPhone = String(phone || '').replace(/[\\s().-]/g, '').replace(/^00/, '+');
+      if (!/^\\+[1-9]\\d{7,14}$/.test(normalizedPhone)) return { ok: false, error: 'Saisissez votre numéro au format international, par exemple +22890123456.' };
+      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré.' };
       try {
-        const res = await B.DataRepository.remote.signIn(String(email || '').trim(), password);
+        const res = await B.DataRepository.remote.signIn(normalizedPhone, password);
         if (res.error) return { ok: false, error: res.error.message };
         await B.DataRepository.hydrate();
         const user = B.session.user();
@@ -168,16 +179,8 @@
       try { if (B.DataRepository.remote && B.DataRepository.remote.ready) await B.DataRepository.remote.signOut(); } catch (e) { /* local session is still cleared */ }
       B.session.logout();
     },
-    resetPassword: async function (email) {
-      if (!email || email.indexOf('@') < 1) return { ok: false, error: 'Indiquez une adresse email valide.' };
-      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré.' };
-      try {
-        const res = await B.DataRepository.remote.resetPassword(email.trim());
-        if (res.error) return { ok: false, error: res.error.message };
-        return { ok: true, message: 'Un lien de réinitialisation a été envoyé à votre adresse email.' };
-      } catch (e) {
-        return { ok: false, error: e.message || 'Impossible d’envoyer le lien.' };
-      }
+    resetPassword: async function () {
+      return { ok: false, error: 'La récupération par téléphone sans SMS n’est pas activée. Contactez le support BATIYO pour réinitialiser votre accès.' };
     },
     completeOnboarding: async function (patch) {
       const u = B.session.user();
