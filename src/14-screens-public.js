@@ -786,7 +786,7 @@
             otp: String(otpInput.value || '').trim()
           }
         });
-        if (result.error) throw new Error(result.error.message || 'Le service de paiement a retourné une erreur.');
+        if (result.error) throw new Error((result.data && result.data.message) || result.error.message || 'Le service de paiement a retourné une erreur.');
         const data = result.data || {};
         if (!data.success) throw new Error(data.message || data.error || 'Impossible de lancer le paiement.');
         feedback.className = 'banner banner-info';
