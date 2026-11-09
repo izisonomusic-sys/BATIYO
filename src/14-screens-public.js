@@ -665,27 +665,49 @@
   /* ---------------------------------- Tarifs ------------------------------ */
   function pricing() {
     const plans = [
-      { name: 'Gratuit', price: '0 FCFA', tag: 'Pour découvrir BATIYO', features: ['Clients et devis illimités', 'Catalogue de votre métier', 'PDF des devis et factures', 'Dépenses et budgets de chantier', 'Fonctionne hors connexion'], cta: 'Commencer gratuitement', featured: false },
-      { name: 'Pro', price: '5 000 FCFA', per: '/ mois', tag: 'Pour les artisans actifs', features: ['Tout le plan Gratuit', 'Assistant BATIYO illimité', 'Analyse et rapports', 'Photos de chantier et justificatifs', 'Modèles de devis par métier', 'Alertes de dépassement'], cta: 'Choisir Pro', featured: true },
-      { name: 'Business', price: '12 000 FCFA', per: '/ mois', tag: 'Pour les petites équipes', features: ['Tout le plan Pro', 'Plusieurs utilisateurs (bientôt)', 'Suivi de plusieurs chantiers en parallèle', 'Export des données', 'Support prioritaire'], cta: 'Choisir Business', featured: false }
+      { name: '1 mois', price: '3 500 FCFA', duration: 'Accès Pro pendant 1 mois', featured: false },
+      { name: '2 mois', price: '7 000 FCFA', duration: 'Accès Pro pendant 2 mois', featured: false },
+      { name: '6 mois', price: '35 000 FCFA', duration: 'Accès Pro pendant 6 mois', featured: true }
     ];
-    return publicPage('Tarifs', 'Des offres simples, sans engagement.', `
-      <div class="grid grid-3-md mt-16">
-        ${plans.map(function (p) {
-          return '<article class="card plan ' + (p.featured ? 'featured' : '') + '">' +
-            (p.featured ? '<div class="row-between">' + ui().badge('Le plus choisi', 'primary') + '</div>' : '') +
-            '<div><div class="strong">' + h(p.name) + '</div><div class="tiny muted">' + h(p.tag) + '</div></div>' +
-            '<div class="row" style="gap:6px;align-items:baseline"><span class="price">' + h(p.price) + '</span>' + (p.per ? '<span class="muted">' + h(p.per) + '</span>' : '') + '</div>' +
-            '<ul>' + p.features.map(function (f) { return '<li>' + ui().icon('check', 17) + '<span>' + h(f) + '</span></li>'; }).join('') + '</ul>' +
-            '<a class="btn ' + (p.featured ? 'btn-primary' : 'btn-ghost') + ' btn-block" href="#/register">' + h(p.cta) + '</a>' +
-            '</article>';
-        }).join('')}
+    return publicPage('Tarifs BATIYO', 'Commencez gratuitement, puis passez à Pro quand votre activité grandit.', `
+      <div class="grid grid-2-md mt-16">
+        <article class="card plan">
+          <div class="strong">Gratuit</div>
+          <div class="tiny muted">Essai à vie — sans paiement</div>
+          <div class="price">0 FCFA</div>
+          <ul>
+            <li>${ui().icon('check', 17)}<span>10 devis gratuits à vie</span></li>
+            <li>${ui().icon('check', 17)}<span>10 factures gratuites à vie</span></li>
+            <li>${ui().icon('check', 17)}<span>Création de brouillons sans limite</span></li>
+            <li>${ui().icon('check', 17)}<span>Clients, chantiers et dépenses</span></li>
+          </ul>
+          <div class="tiny muted">Après les 10 devis ou factures gratuits, vous pouvez continuer à créer des brouillons, mais le téléchargement PDF et le partage de ces nouveaux documents nécessitent Pro.</div>
+          <a class="btn btn-ghost btn-block mt-12" href="#/register">Créer mon compte gratuit</a>
+        </article>
+        <article class="card plan featured">
+          <div class="row-between"><div class="strong">BATIYO Pro</div>${ui().badge('Accès complet', 'primary')}</div>
+          <div class="tiny muted">Choisissez la durée qui vous convient.</div>
+          <div class="stack-sm mt-12">
+            ${plans.map(function (p) {
+              return '<div class="row-between" style="padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)">' +
+                '<div><div class="strong">' + h(p.name) + '</div><div class="tiny muted">' + h(p.duration) + '</div></div>' +
+                '<div class="strong">' + h(p.price) + '</div></div>';
+            }).join('')}
+          </div>
+          <ul class="mt-12">
+            <li>${ui().icon('check', 17)}<span>Téléchargement PDF des devis et factures</span></li>
+            <li>${ui().icon('check', 17)}<span>Partage des documents par WhatsApp</span></li>
+            <li>${ui().icon('check', 17)}<span>Assistant, analyses et rapports avancés</span></li>
+            <li>${ui().icon('check', 17)}<span>Conservation de toutes vos données</span></li>
+          </ul>
+          <div class="banner banner-info mt-12">${ui().icon('info', 18)} <span>Le paiement en ligne sera activé après la connexion de votre compte marchand PayDunya. Aucun abonnement ne sera activé avant confirmation du paiement.</span></div>
+        </article>
       </div>
-      <div class="banner banner-info mt-24">${ui().icon('info', 18)} <span><strong>Aucun paiement dans BATIYO pour le moment.</strong> Aucun moyen de paiement (Mobile Money, carte bancaire) n'est intégré. Les offres payantes seront activées dans une prochaine version.</span></div>
       <div class="card card-pad-lg mt-24">
-        <h3>Questions fréquentes sur les offres</h3>
-        <div class="mt-12">${faqItem('Puis-je changer d’offre plus tard ?', 'Oui. Les offres sont indépendantes de vos données : vous pouvez changer à tout moment sans perdre vos devis, factures ou chantiers.')}</div>
-        <div>${faqItem('Que se passe-t-il si je dépasse le plan Gratuit ?', 'Rien n’est bloqué brutalement : vous serez simplement invité à passer à une offre supérieure lorsque les fonctionnalités avancées vous seront utiles.')}</div>
+        <h3>Questions fréquentes</h3>
+        <div class="mt-12">${faqItem('Les 10 devis et 10 factures gratuits se renouvellent-ils chaque mois ?', 'Non. Il s’agit d’un essai unique à vie par compte. Le compteur ne revient pas à zéro chaque mois.')}</div>
+        <div>${faqItem('Puis-je continuer à travailler après avoir utilisé mes documents gratuits ?', 'Oui. Vous pouvez toujours créer et enregistrer des brouillons. Le téléchargement PDF et le partage des documents créés au-delà du quota nécessitent un abonnement Pro.')}</div>
+        <div>${faqItem('Est-ce que je perds mes documents si mon abonnement expire ?', 'Non. Vos devis, factures et autres données restent conservés. Les droits Pro restent actifs pendant la période de grâce de 7 jours après expiration.')}</div>
       </div>`, true);
   }
 
