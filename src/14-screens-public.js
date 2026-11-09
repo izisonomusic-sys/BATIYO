@@ -51,13 +51,13 @@
           <div class="grid-hero">
             <div>
               <span class="eyebrow">${ui().icon('sparkles', 14)} L'assistant intelligent des artisans</span>
-              <h1>Devis, dépenses et bénéfices.<br>Simplement.</h1>
-              <p class="lead">BATIYO aide les artisans et petites entreprises à créer leurs devis et factures, suivre leurs dépenses et comprendre la rentabilité de leurs chantiers depuis leur téléphone.</p>
+              <h1>Vos chantiers avancent.<br>BATIYO garde le cap.</h1>
+              <p class="lead">Préparez vos devis sur le chantier, suivez vos dépenses et gardez une vision claire de votre activité. BATIYO accompagne les artisans, du premier coup de truelle jusqu’à la livraison.</p>
               <div class="hero-cta">
-                <a class="btn btn-primary btn-lg" href="#/register">Commencer gratuitement</a>
-                <a class="btn btn-ghost btn-lg" href="#comment">Voir comment ça marche</a>
+                <a class="btn btn-primary btn-lg" href="#/register">Créer mon compte gratuitement</a>
+                <a class="btn btn-ghost btn-lg" href="#metiers">Découvrir les métiers</a>
               </div>
-              <div class="micro">Simple • Rapide • Mobile • Offline-first</div>
+              <div class="micro">Pensé pour les réalités des artisans en Afrique de l’Ouest</div>
               <div class="row wrap small muted" style="margin-top:18px;gap:16px">
                 <span class="row" style="gap:6px">${ui().icon('checkCircle', 16)} Devis en 2 minutes</span>
                 <span class="row" style="gap:6px">${ui().icon('checkCircle', 16)} Catalogue selon votre métier</span>
@@ -73,10 +73,10 @@
                 <div class="hero-visual-phone">${heroAppMockup()}</div>
                 <figcaption class="hero-badge">
                   <span class="hb-ico">${ui().icon('sparkles', 15)}</span>
-                  <span><strong>Devis créé depuis le chantier</strong><br>515 000 FCFA calculés automatiquement</span>
+                  <span><strong>Votre chantier, mieux organisé</strong><br>Un devis clair, prêt à être partagé</span>
                 </figcaption>
               </figure>
-              <p class="hero-visual-note">Illustration — aperçu du produit.</p>
+              
             </div>
           </div>
         </div>
@@ -160,40 +160,6 @@
         </div>
       </section>
 
-      <!-- ==================== DÉMONSTRATION / RENTABILITÉ =============== -->
-      <section class="section" id="rentabilite">
-        <div class="container">
-          <div class="grid grid-2" style="align-items:center">
-            <div>
-              <span class="eyebrow">Prévision et réel</span>
-              <h2>Vous savez enfin ce qu'un chantier vous rapporte</h2>
-              <p class="muted mt-12">BATIYO distingue clairement le budget prévu, les dépenses réelles et le résultat provisoire. Les alertes vous préviennent avant que le budget ne déborde.</p>
-              <ul class="plan" style="padding:0;list-style:none;margin-top:16px">
-                <li>${ui().icon('check', 18)} <span>Budget prévisionnel généré depuis le devis</span></li>
-                <li>${ui().icon('check', 18)} <span>Dépenses classées par poste : ciment, fer, sable, main-d'œuvre, transport…</span></li>
-                <li>${ui().icon('check', 18)} <span>Alertes d'attention et de dépassement</span></li>
-                <li>${ui().icon('check', 18)} <span>Analyse par chantier, par catégorie et par période</span></li>
-              </ul>
-              <div class="banner banner-info mt-16">${ui().icon('info', 18)} <span>BATIYO fournit des calculs opérationnels. Ce n'est pas un logiciel de comptabilité et il ne remplace pas un comptable.</span></div>
-            </div>
-            <div class="card card-pad-lg">
-              <div class="row-between mb-12"><strong>Chantier Maison Koffi</strong>${ui().badge('Attention', 'warn')}</div>
-              ${ui().kv('Montant du contrat', B.money(3500000))}
-              ${ui().kv('Budget prévu', B.money(2900000))}
-              ${ui().kv('Marge prévisionnelle', B.money(600000), 'tone-success')}
-              ${ui().kv('Dépenses réelles', B.money(2150000), 'tone-warn')}
-              ${ui().kv('Résultat provisoire', B.money(1350000), 'tone-success')}
-              <div class="divider"></div>
-              <div class="stack-sm">
-                ${alertPreview('danger', 'Dépassement', 'Les dépenses de transport dépassent le budget prévu de 20 %.')}
-                ${alertPreview('warn', 'Attention', 'Le budget ciment est presque atteint.')}
-                ${alertPreview('success', 'Normal', 'Les dépenses restent dans le budget prévu.')}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <!-- ===================== TÉMOIGNAGES (#12) ======================= -->
       <section class="section" id="depenses-maitrisees" style="background:#FBFDFE;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
         <div class="container">
@@ -225,47 +191,31 @@
       <!-- ========================== FOOTER (#14) ======================= -->
       <footer class="lp-footer">
         <div class="container">
-          <div class="grid grid-4-md">
-            <div>
-              <div class="lp-logo">${logoMark()} BATIYO</div>
-              <p class="muted small mt-8">L'assistant intelligent des artisans.</p>
-              <div class="social mt-16">
-                <a href="#/faq" aria-label="Facebook">${ui().icon('users', 18)}</a>
-                <a href="#/faq" aria-label="WhatsApp">${ui().icon('whatsapp', 18)}</a>
-                <a href="#/faq" aria-label="Email">${ui().icon('mail', 18)}</a>
-              </div>
+          <div class="footer-main">
+            <div class="footer-brand">
+              <a href="#/" class="lp-logo">${logoMark()} BATIYO</a>
+              <p>Le compagnon de chantier des artisans et petites entreprises. Des devis clairs, des dépenses suivies et une activité mieux maîtrisée.</p>
+              <span class="footer-tag">Conçu pour le terrain</span>
             </div>
-            <div>
-              <h4>Produit</h4>
-              <a href="#fonctionnalites">Fonctionnalités</a>
-              <a href="#devis-intelligent">Devis</a>
-              <a href="#devis-intelligent">Factures</a>
-              <a href="#comment">Chantiers</a>
-              <a href="#depenses-maitrisees">Dépenses</a>
-              <a href="#/pricing">${ui().icon('creditCard', 16)} Abonnement</a>
+            <div class="footer-links"><h4>BATIYO</h4>
+              <a href="#fonctionnalites">Fonctionnalités</a><a href="#metiers">Métiers</a>
+              <a href="#comment">Comment ça marche</a><a href="#/pricing">Nos abonnements</a>
             </div>
-            <div>
-              <h4>Entreprise</h4>
-              <a href="#/legal/notice">À propos</a>
-              <a href="#/faq">Contact</a>
-              <h4 style="margin-top:18px">Ressources</h4>
-              <a href="#/faq">FAQ</a>
-              <a href="#/faq">Centre d'aide</a>
-              <a href="#comment">Guide</a>
+            <div class="footer-links"><h4>Accompagnement</h4>
+              <a href="#/faq">Questions fréquentes</a><a href="#/faq">Centre d'aide</a>
+              <a href="#/login">Mon espace</a><a href="#/register">Créer un compte</a>
             </div>
-            <div>
-              <h4>Légal</h4>
-              <a href="#/legal/terms">Conditions d'utilisation</a>
-              <a href="#/legal/privacy">Politique de confidentialité</a>
+            <div class="footer-links"><h4>Informations</h4>
+              <a href="#/legal/terms">Conditions d'utilisation</a><a href="#/legal/privacy">Confidentialité</a>
               <a href="#/legal/notice">Mentions légales</a>
             </div>
           </div>
           <div class="bottom">
-            <div>© BATIYO — Tous droits réservés.</div>
-            <div class="row" style="gap:8px">${ui().icon('wifiOff', 15)} Fonctionne hors connexion · ${ui().icon('shield', 15)} Données isolées par entreprise</div>
+            <div>© ${new Date().getFullYear()} BATIYO. Tous droits réservés.</div>
+            <div class="footer-trust">Utilisable hors connexion <span>•</span> Vos données restent protégées</div>
           </div>
         </div>
-      </footer>`;
+      </footer>ter>`;
     wrap.appendChild(body);
 
     /* Header au scroll + menu mobile (#7) */
@@ -663,52 +613,78 @@
   }
 
   /* ---------------------------------- Tarifs ------------------------------ */
+
+  /* ---------------------------------- Tarifs ------------------------------ */
+  const SUBSCRIPTION_PLANS = [
+    { id: '1-mois', name: '1 mois', price: '3 500 FCFA', duration: '30 jours', note: 'Pour démarrer avec BATIYO Pro' },
+    { id: '2-mois', name: '2 mois', price: '7 000 FCFA', duration: '60 jours', note: 'Pour garder le rythme de vos chantiers' },
+    { id: '6-mois', name: '6 mois', price: '35 000 FCFA', duration: '180 jours', note: 'Pour une utilisation sur la durée' }
+  ];
+
   function pricing() {
-    const plans = [
-      { name: '1 mois', price: '3 500 FCFA', duration: 'Accès Pro pendant 1 mois', featured: false },
-      { name: '2 mois', price: '7 000 FCFA', duration: 'Accès Pro pendant 2 mois', featured: false },
-      { name: '6 mois', price: '35 000 FCFA', duration: 'Accès Pro pendant 6 mois', featured: true }
-    ];
-    return publicPage('Tarifs BATIYO', 'Commencez gratuitement, puis passez à Pro quand votre activité grandit.', `
-      <div class="grid grid-2-md mt-16">
-        <article class="card plan">
-          <div class="strong">Gratuit</div>
-          <div class="tiny muted">Essai à vie — sans paiement</div>
-          <div class="price">0 FCFA</div>
-          <ul>
-            <li>${ui().icon('check', 17)}<span>10 devis gratuits à vie</span></li>
-            <li>${ui().icon('check', 17)}<span>10 factures gratuites à vie</span></li>
-            <li>${ui().icon('check', 17)}<span>Création de brouillons sans limite</span></li>
-            <li>${ui().icon('check', 17)}<span>Clients, chantiers et dépenses</span></li>
-          </ul>
-          <div class="tiny muted">Après les 10 devis ou factures gratuits, vous pouvez continuer à créer des brouillons, mais le téléchargement PDF et le partage de ces nouveaux documents nécessitent Pro.</div>
-          <a class="btn btn-ghost btn-block mt-12" href="#/register">Créer mon compte gratuit</a>
-        </article>
-        <article class="card plan featured">
-          <div class="row-between"><div class="strong">BATIYO Pro</div>${ui().badge('Accès complet', 'primary')}</div>
-          <div class="tiny muted">Choisissez la durée qui vous convient.</div>
-          <div class="stack-sm mt-12">
-            ${plans.map(function (p) {
-              return '<div class="row-between" style="padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)">' +
-                '<div><div class="strong">' + h(p.name) + '</div><div class="tiny muted">' + h(p.duration) + '</div></div>' +
-                '<div class="strong">' + h(p.price) + '</div></div>';
-            }).join('')}
-          </div>
-          <ul class="mt-12">
-            <li>${ui().icon('check', 17)}<span>Téléchargement PDF des devis et factures</span></li>
-            <li>${ui().icon('check', 17)}<span>Partage des documents par WhatsApp</span></li>
-            <li>${ui().icon('check', 17)}<span>Assistant, analyses et rapports avancés</span></li>
-            <li>${ui().icon('check', 17)}<span>Conservation de toutes vos données</span></li>
-          </ul>
-          <div class="banner banner-info mt-12">${ui().icon('info', 18)} <span>Le paiement en ligne sera activé après la connexion de votre compte marchand PayDunya. Aucun abonnement ne sera activé avant confirmation du paiement.</span></div>
-        </article>
-      </div>
-      <div class="card card-pad-lg mt-24">
-        <h3>Questions fréquentes</h3>
-        <div class="mt-12">${faqItem('Les 10 devis et 10 factures gratuits se renouvellent-ils chaque mois ?', 'Non. Il s’agit d’un essai unique à vie par compte. Le compteur ne revient pas à zéro chaque mois.')}</div>
-        <div>${faqItem('Puis-je continuer à travailler après avoir utilisé mes documents gratuits ?', 'Oui. Vous pouvez toujours créer et enregistrer des brouillons. Le téléchargement PDF et le partage des documents créés au-delà du quota nécessitent un abonnement Pro.')}</div>
-        <div>${faqItem('Est-ce que je perds mes documents si mon abonnement expire ?', 'Non. Vos devis, factures et autres données restent conservés. Les droits Pro restent actifs pendant la période de grâce de 7 jours après expiration.')}</div>
-      </div>`, true);
+    const cards = SUBSCRIPTION_PLANS.map(function (p, index) {
+      return '<article class="card plan subscription-plan ' + (index === 2 ? 'featured' : '') + '">' +
+        (index === 2 ? '<span class="subscription-ribbon">Meilleure durée</span>' : '') +
+        '<div class="subscription-duration">' + h(p.name) + '</div>' +
+        '<div class="price">' + h(p.price) + '</div>' +
+        '<div class="tiny muted">' + h(p.duration) + ' d’accès Pro</div>' +
+        '<p class="subscription-note">' + h(p.note) + '</p>' +
+        '<ul><li>' + ui().icon('check', 17) + '<span>Devis et factures PDF sans limite de quota gratuit</span></li>' +
+        '<li>' + ui().icon('check', 17) + '<span>Partage de vos documents</span></li>' +
+        '<li>' + ui().icon('check', 17) + '<span>Assistant et analyses avancées</span></li>' +
+        '<li>' + ui().icon('check', 17) + '<span>Vos données restent conservées</span></li></ul>' +
+        '<a class="btn btn-primary btn-block mt-12" href="#/subscribe/' + h(p.id) + '">Prends mon abonnement</a></article>';
+    }).join('');
+    return publicPage('Choisissez votre abonnement', 'Sélectionnez la durée qui correspond à votre activité. Chaque formule BATIYO Pro donne accès aux fonctionnalités avancées.',
+      '<section class="pricing-intro mt-24"><span class="eyebrow">' + ui().icon('creditCard', 15) + ' BATIYO Pro</span>' +
+      '<h2>Un abonnement. Toute votre activité mieux suivie.</h2><p class="muted">Choisissez votre durée, puis renseignez vos coordonnées pour préparer le paiement mobile.</p></section>' +
+      '<div class="grid grid-3-md subscription-grid mt-16">' + cards + '</div>' +
+      '<section class="free-plan card mt-24"><div><strong>Vous préférez commencer gratuitement ?</strong>' +
+      '<p class="tiny muted mt-8">10 devis et 10 factures gratuits à vie, avec création de brouillons sans limite.</p></div>' +
+      '<a class="btn btn-ghost" href="#/register">Créer mon compte gratuit</a></section>' +
+      '<div class="card card-pad-lg mt-24"><h3>Questions fréquentes</h3>' +
+      '<div class="mt-12">' + faqItem('Les 10 devis et 10 factures gratuits se renouvellent-ils chaque mois ?', 'Non. Il s’agit d’un essai unique à vie par compte. Le compteur ne revient pas à zéro chaque mois.') + '</div>' +
+      '<div>' + faqItem('Puis-je continuer à travailler après avoir utilisé mes documents gratuits ?', 'Oui. Vous pouvez toujours créer et enregistrer des brouillons. Le téléchargement PDF et le partage des documents créés au-delà du quota nécessitent un abonnement Pro.') + '</div>' +
+      '<div>' + faqItem('Est-ce que je perds mes documents si mon abonnement expire ?', 'Non. Vos devis, factures et autres données restent conservés. Les droits Pro restent actifs pendant la période de grâce de 7 jours après expiration.') + '</div></div>', true);
+  }
+
+  function subscribe(planId) {
+    const selected = SUBSCRIPTION_PLANS.find(function (p) { return p.id === planId; });
+    if (!selected) return pricing();
+    const wrap = publicPage('Finaliser mon abonnement', 'Vérifiez la formule choisie et renseignez vos coordonnées.',
+      '<div class="checkout-layout mt-24"><section class="card checkout-summary">' +
+      '<span class="eyebrow">Votre formule</span><h2>BATIYO Pro — ' + h(selected.name) + '</h2>' +
+      '<div class="checkout-amount">' + h(selected.price) + '</div><p class="muted small">' + h(selected.duration) + ' d’accès Pro à compter de la confirmation du paiement.</p>' +
+      '<div class="divider"></div><div class="row-between"><span class="muted small">Abonnement</span><strong>' + h(selected.name) + '</strong></div>' +
+      '<div class="row-between mt-8"><span class="muted small">Montant à payer</span><strong>' + h(selected.price) + '</strong></div></section>' +
+      '<section class="card card-pad-lg"><h2>Vos coordonnées</h2><p class="muted small mt-8">Le numéro indiqué sera utilisé pour le paiement mobile et les instructions de confirmation.</p>' +
+      '<form id="subscriptionForm" class="form-grid mt-16" novalidate>' +
+      '<div class="field"><label for="subscriberName">Nom et prénom</label><input class="input" id="subscriberName" name="name" type="text" autocomplete="name" placeholder="Ex. : Kossi Amégan" required></div>' +
+      '<div class="field"><label for="subscriberPhone">Numéro de téléphone</label><input class="input" id="subscriberPhone" name="phone" type="tel" autocomplete="tel" placeholder="+228 90 12 34 56" required><span class="hint">Avec l’indicatif du pays, par exemple +228 pour le Togo.</span></div>' +
+      '<div class="banner banner-info"><span>' + ui().icon('smartphone', 18) + '</span><span>Paiement par Mobile Money. Vous recevrez une demande de validation sur votre téléphone lorsque le service marchand sera connecté.</span></div>' +
+      '<button class="btn btn-primary btn-lg btn-block" type="submit">Continuer vers le paiement</button>' +
+      '<p id="checkoutFeedback" class="tiny muted" role="status">Aucun paiement ne sera lancé sans confirmation réelle du service de paiement.</p></form></section></div>' +
+      '<div class="center mt-16"><a href="#/pricing" class="btn btn-ghost btn-sm">' + ui().icon('arrowLeft', 15) + ' Changer de formule</a></div>', true);
+    const form = B.$('#subscriptionForm', wrap);
+    const feedback = B.$('#checkoutFeedback', wrap);
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const name = String(B.$('#subscriberName', form).value || '').trim();
+      const phone = String(B.$('#subscriberPhone', form).value || '').replace(/[\s().-]/g, '').replace(/^00/, '+');
+      if (name.length < 2) {
+        feedback.className = 'tiny tone-danger';
+        feedback.textContent = 'Veuillez renseigner votre nom et prénom.';
+        return;
+      }
+      if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+        feedback.className = 'tiny tone-danger';
+        feedback.textContent = 'Saisissez un numéro au format international, par exemple +22890123456.';
+        return;
+      }
+      feedback.className = 'banner banner-warn';
+      feedback.textContent = 'Vos coordonnées sont valides, mais le paiement n’est pas encore activé. Le compte marchand PayDunya doit être connecté avant de lancer une demande Mobile Money. Aucun débit ni SMS de validation n’a été déclenché.';
+    });
+    return wrap;
   }
 
   /* ----------------------------------- FAQ -------------------------------- */
@@ -807,7 +783,7 @@
   B.screens = B.screens || {};
   Object.assign(B.screens, {
     landing: landing, login: login, register: register, onboarding: onboarding,
-    pricing: pricing, faq: faq, legal: legal, logoMark: logoMark, authLayout: authLayout,
+    pricing: pricing, subscribe: subscribe, faq: faq, legal: legal, logoMark: logoMark, authLayout: authLayout,
     phoneMockup: phoneMockup, heroAppMockup: heroAppMockup
   });
 })(globalThis.BATIYO = globalThis.BATIYO || {});
