@@ -215,7 +215,7 @@
             <div class="footer-trust">Utilisable hors connexion <span>•</span> Vos données restent protégées</div>
           </div>
         </div>
-      </footer>ter>`;
+      </footer>`;
     wrap.appendChild(body);
 
     /* Header au scroll + menu mobile (#7) */
