@@ -973,11 +973,93 @@
     return wrap;
   }
 
+
+  /* =======================================================================
+     ADMINISTRATION BATIYO — réservé au compte principal
+     ======================================================================= */
+  function adminDashboard() {
+    const wrap = B.el('<div class="stack"></div>');
+    wrap.innerHTML = '<div class="row-between wrap"><div><h2>Administration BATIYO</h2><div class="small muted">Vue globale des utilisateurs, abonnements, paiements et devis.</div></div><button class="btn btn-ghost" data-refresh>Actualiser</button></div><div class="card card-pad" data-admin-state>Chargement des données sécurisées…</div>';
+    const state = B.$('[data-admin-state]', wrap);
+    B.$('[data-refresh]', wrap).addEventListener('click', function () { B.router.refresh(); });
+    (async function () {
+      try {
+        const remote = B.DataRepository && B.DataRepository.remote;
+        if (!remote || !remote.ready) throw new Error('Connexion à Supabase indisponible.');
+        const auth = await remote.getUser();
+        const user = auth && auth.data && auth.data.user;
+        if (!user || !user.app_metadata || user.app_metadata.role !== 'admin') {
+          state.innerHTML = '<h3>Accès réservé</h3><p class="small muted">Ce compte ne possède pas les droits administrateur. Connectez-vous avec le compte principal autorisé.</p>';
+          return;
+        }
+        const db = remote.client;
+        const results = await Promise.all([
+          db.from('profiles').select('id,full_name,phone,email,role,business_id,created_at').order('created_at', { ascending: false }),
+          db.from('businesses').select('id,name,phone,created_at'),
+          db.from('business_subscriptions').select('id,business_id,plan_id,status,billing_period_months,amount_fcfa,provider,payment_reference,provider_reference,created_at,starts_at,ends_at').order('created_at', { ascending: false }),
+          db.from('quotes').select('id,business_id,number,status,total,date,created_at').order('created_at', { ascending: false }),
+          db.from('payments').select('id,business_id,invoice_id,amount,date,method,reference,created_at').order('created_at', { ascending: false })
+        ]);
+        results.forEach(function (r) { if (r.error) throw r.error; });
+        const profiles = results[0].data || [];
+        const businesses = results[1].data || [];
+        const subs = results[2].data || [];
+        const quotes = results[3].data || [];
+        const payments = results[4].data || [];
+        const businessById = {};
+        businesses.forEach(function (b) { businessById[b.id] = b; });
+        const confirmed = subs.filter(function (s) { return ['active','paid','succeeded','completed','confirmed'].indexOf(String(s.status || '').toLowerCase()) >= 0; });
+        const pending = subs.filter(function (s) { return String(s.status || '').toLowerCase() === 'pending'; });
+        const revenue = confirmed.reduce(function (n, s) { return n + (Number(s.amount_fcfa) || 0); }, 0);
+        function money(v) { return (Number(v) || 0).toLocaleString('fr-FR') + ' FCFA'; }
+        function esc(v) { return h(v == null || v === '' ? '—' : String(v)); }
+        function stat(label, value, hint, ico) {
+          return '<div class="card card-pad"><div class="row-between"><span class="small muted">' + label + '</span>' + ui().icon(ico,18) + '</div><div class="strong" style="font-size:25px;margin-top:8px">' + value + '</div><div class="tiny muted">' + hint + '</div></div>';
+        }
+        function table(title, headers, rows, empty) {
+          return '<div class="card"><div class="card-head"><h3>' + title + '</h3></div><div class="table-wrap"><table class="data-table"><thead><tr>' + headers.map(function (x) { return '<th>' + x + '</th>'; }).join('') + '</tr></thead><tbody>' + (rows.length ? rows.join('') : '<tr><td colspan="' + headers.length + '" class="muted">' + empty + '</td></tr>') + '</tbody></table></div></div>';
+        }
+        const userRows = profiles.slice(0, 8).map(function (p) {
+          const b = businessById[p.business_id];
+          return '<tr><td><strong>' + esc(p.full_name) + '</strong><div class="tiny muted">' + esc(p.phone || p.email) + '</div></td><td>' + esc(b && b.name) + '</td><td>' + esc(p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—') + '</td></tr>';
+        });
+        const subRows = subs.slice(0, 8).map(function (s) {
+          const b = businessById[s.business_id];
+          return '<tr><td>' + esc(b && b.name) + '</td><td>' + esc(s.plan_id || (s.billing_period_months + ' mois')) + '</td><td>' + esc(s.status) + '</td><td>' + money(s.amount_fcfa) + '</td></tr>';
+        });
+        const quoteRows = quotes.slice(0, 8).map(function (q) {
+          const b = businessById[q.business_id];
+          return '<tr><td>' + esc(q.number) + '</td><td>' + esc(b && b.name) + '</td><td>' + esc(q.status) + '</td><td>' + money(q.total) + '</td></tr>';
+        });
+        const paymentRows = payments.slice(0, 8).map(function (p) {
+          const b = businessById[p.business_id];
+          return '<tr><td>' + esc(b && b.name) + '</td><td>' + esc(p.method) + '</td><td>' + esc(p.reference) + '</td><td>' + money(p.amount) + '</td></tr>';
+        });
+        state.innerHTML =
+          '<div class="grid grid-2 grid-4-md">' +
+          stat('Utilisateurs inscrits', profiles.length, 'Comptes enregistrés', 'users') +
+          stat('Entreprises', businesses.length, 'Espaces professionnels', 'briefcase') +
+          stat('Abonnements actifs', confirmed.length, 'Confirmés par PayDunya', 'badgeCheck') +
+          stat('Revenus abonnements', money(revenue), pending.length + ' paiement(s) en attente', 'wallet') +
+          stat('Devis créés', quotes.length, 'Toutes entreprises confondues', 'fileText') +
+          stat('Paiements factures', payments.length, 'Paiements enregistrés', 'creditCard') +
+          '</div>' +
+          table('Derniers utilisateurs', ['Utilisateur','Entreprise','Inscription'], userRows, 'Aucun utilisateur enregistré.') +
+          table('Abonnements et paiements PayDunya', ['Entreprise','Formule','Statut','Montant'], subRows, 'Aucun abonnement enregistré.') +
+          table('Derniers devis', ['Référence','Entreprise','Statut','Total'], quoteRows, 'Aucun devis créé.') +
+          table('Paiements de factures', ['Entreprise','Méthode','Référence','Montant'], paymentRows, 'Aucun paiement de facture.');
+      } catch (err) {
+        state.innerHTML = '<h3>Impossible de charger les statistiques</h3><p class="small muted">' + h(err && err.message ? err.message : String(err)) + '</p><p class="tiny muted">Vérifiez la connexion puis actualisez la page.</p>';
+      }
+    })();
+    return wrap;
+  }
+
   function notFound(message) { return B.screens.notFound(message); }
 
   B.screens = B.screens || {};
   Object.assign(B.screens, {
-    clientsList: clientsList, clientDetail: clientDetail, catalog: catalog,
+    adminDashboard: adminDashboard, clientsList: clientsList, clientDetail: clientDetail, catalog: catalog,
     projectsList: projectsList, projectDetail: projectDetail, expenses: expenses,
     documents: documents, assistant: assistant, profile: profile, settings: settings
   });
