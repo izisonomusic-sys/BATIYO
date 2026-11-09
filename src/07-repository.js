@@ -421,7 +421,20 @@
         if (pair[1].length) await upsert(pair[0], pair[1]);
       }
 
-      const quotes = (db.quotes || []).filter(function(q){ return q.business_id === businessId; });
+      /* Les suppressions de devis sont d'abord marquées localement (offline-first).
+         Lors de la synchronisation, elles doivent devenir de vrais DELETE distants :
+         un simple upsert avec deleted_at laissait les lignes et leurs brouillons
+         réapparaître dans certaines réhydratations. Les factures liées sont
+         conservées : la FK quote_id est ON DELETE SET NULL. */
+      const allQuotes = (db.quotes || []).filter(function(q){ return q.business_id === businessId; });
+      const deletedQuotes = allQuotes.filter(function(q){ return !!q.deleted_at; });
+      for (const q of deletedQuotes) {
+        const delQuote = await ensure().from('quotes').delete()
+          .eq('id', q.id).eq('business_id', businessId).select('id');
+        if (delQuote.error) throw delQuote.error;
+      }
+
+      const quotes = allQuotes.filter(function(q){ return !q.deleted_at; });
       if (quotes.length) {
         await upsert('quotes', quotes.map(function(q){ return cleanGeneric(q, ['lines']); }));
         const quoteItems = [];
