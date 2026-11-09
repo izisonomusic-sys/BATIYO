@@ -196,6 +196,7 @@
               <a href="#/" class="lp-logo">${logoMark()} BATIYO</a>
               <p>Le compagnon de chantier des artisans et petites entreprises. Des devis clairs, des dépenses suivies et une activité mieux maîtrisée.</p>
               <span class="footer-tag">Conçu pour le terrain</span>
+              <p class="footer-founder">Fondé par <strong>Sotodi Vainqueur</strong>.</p>
             </div>
             <div class="footer-links"><h4>BATIYO</h4>
               <a href="#fonctionnalites">Fonctionnalités</a><a href="#metiers">Métiers</a>

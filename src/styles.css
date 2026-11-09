@@ -874,3 +874,33 @@ body.no-fab .fab-wrap { display: none; }
 @media (min-width: 1024px) {
   .app-footer { padding-bottom: 24px; }
 }
+
+
+/* Harmonisation des footers public et espace connecté */
+.lp-footer .footer-founder {
+  margin-top: 12px;
+  color: #B8CBC8;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.lp-footer .footer-founder strong { color: #fff; font-weight: 700; }
+.app-footer .footer-subscribe-link {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+  margin: 10px 0 8px;
+  padding: 11px 14px;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 10px;
+  white-space: normal;
+}
+.app-footer .footer-subscribe-link:hover {
+  color: #fff;
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+@media (max-width: 767px) {
+  .app-footer .footer-subscribe-link { max-width: 260px; }
+}
