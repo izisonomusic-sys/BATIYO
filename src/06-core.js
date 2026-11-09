@@ -219,11 +219,22 @@
         return { allowed: false, reason: 'offline', message: 'Connectez-vous à Internet pour vérifier votre quota avant le téléchargement ou le partage.' };
       }
       try {
+        if (B.DataRepository.syncNow) await B.DataRepository.syncNow();
         const res = await B.DataRepository.remote.rpc('can_export_document', { p_document_type: type, p_document_id: documentId });
         if (res.error) throw res.error;
         return res.data || { allowed: false, reason: 'unknown' };
       } catch (e) {
-        return { allowed: false, reason: 'check_failed', message: 'Impossible de vérifier votre quota. Réessayez lorsque la connexion sera rétablie.' };
+        /* Les dix premiers documents restent exportables hors connexion. */
+        const table = type === 'quote' ? 'quotes' : 'invoices';
+        const businessId = B.session.businessId();
+        const rows = (B.DataRepository.local.table(table) || [])
+          .filter(function (row) { return row.business_id === businessId; })
+          .sort(function (a, b) {
+            return String(a.created_at || '').localeCompare(String(b.created_at || '')) || String(a.id).localeCompare(String(b.id));
+          });
+        const rank = rows.findIndex(function (row) { return row.id === documentId; }) + 1;
+        if (rank > 0 && rank <= 10) return { allowed: true, reason: 'offline_free_quota', document_rank: rank, limit: 10 };
+        return { allowed: false, reason: 'check_failed', message: 'Connectez-vous à Internet pour vérifier votre quota ou votre abonnement avant le téléchargement ou le partage.' };
       }
     },
     requireDocumentExport: async function (type, doc) {
