@@ -397,7 +397,20 @@
     init: function () {
       if ('serviceWorker' in navigator && location.protocol !== 'file:') {
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('sw.js').catch(function () { /* hors ligne : pas bloquant */ });
+          navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (registration) {
+            /* Vérifie la nouvelle version du worker à chaque ouverture. */
+            if (registration && typeof registration.update === 'function') registration.update().catch(function () {});
+          }).catch(function () { /* hors ligne : pas bloquant */ });
+          /* Quand une nouvelle version prend le contrôle, recharge les scripts
+             pour afficher immédiatement la version publiée. */
+          if (navigator.serviceWorker.controller) {
+            var reloadingForUpdate = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+              if (reloadingForUpdate) return;
+              reloadingForUpdate = true;
+              window.location.reload();
+            });
+          }
         });
       }
       window.addEventListener('beforeinstallprompt', function (e) {
