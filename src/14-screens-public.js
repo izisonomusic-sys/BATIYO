@@ -27,7 +27,7 @@
       <header class="lp-header" id="lpHeader">
         <div class="container">
           <div class="inner">
-            <a href="#/" class="lp-logo">${logoMark()} BATIYO</a>
+            <a href="${returnPath}" class="lp-logo">${logoMark()} BATIYO</a>
             <nav class="lp-nav" aria-label="Navigation principale">
               <a href="#fonctionnalites">Fonctionnalités</a>
               <a href="#metiers">Métiers</a>
@@ -892,6 +892,7 @@
   /* ------------------------- Gabarit de page publique ---------------------- */
   function publicPage(title, subtitle, bodyHtml, narrow) {
     const wrap = B.el('<div class="lp"></div>');
+    const returnPath = B.session && B.session.isLoggedIn() ? '#/dashboard' : '#/';
     wrap.innerHTML = `
       <header class="lp-header scrolled">
         <div class="container"><div class="inner">
@@ -908,7 +909,7 @@
         </div></div>
       </header>
       <main class="container ${narrow ? 'narrow' : ''}" style="padding-top:28px;padding-bottom:40px">
-        <a href="#/" class="btn btn-ghost btn-sm">${ui().icon('arrowLeft', 16)} Retour à l'accueil</a>
+        <a href="${returnPath}" class="btn btn-ghost btn-sm">${ui().icon('arrowLeft', 16)} ${B.session && B.session.isLoggedIn() ? 'Retour à mon espace' : 'Retour à l\'accueil'}</a>
         <h1 class="mt-16">${h(title)}</h1>
         <p class="muted mt-8">${h(subtitle || '')}</p>
         ${bodyHtml}
