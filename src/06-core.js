@@ -160,6 +160,17 @@
         return { ok: false, error: e.message || 'Impossible de créer le compte.' };
       }
     },
+    loginWithGoogle: async function () {
+      if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré.' };
+      try {
+        const redirectTo = window.location.origin + window.location.pathname + '?auth=google';
+        const res = await B.DataRepository.remote.signInWithOAuth('google', { redirectTo: redirectTo });
+        if (res.error) return { ok: false, error: res.error.message };
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e.message || 'Connexion Google impossible.' };
+      }
+    },
     login: async function (phone, password) {
       const normalizedPhone = String(phone || '').replace(/[\s().-]/g, '').replace(/^00/, '+');
       if (!/^\+[1-9]\d{7,14}$/.test(normalizedPhone)) return { ok: false, error: 'Saisissez votre numéro au format international, par exemple +22890123456.' };
