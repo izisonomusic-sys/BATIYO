@@ -604,6 +604,7 @@
         ready = true;
         return true;
       },
+      rpc: async function (name, args) { return ensure().rpc(name, args || {}); },
       getSession: async function () { return ensure().auth.getSession(); },
       getUser: async function () { return ensure().auth.getUser(); },
       signUp: async function (payload) {
