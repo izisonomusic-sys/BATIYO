@@ -219,7 +219,7 @@
       body.appendChild(chips);
       const list = B.el('<div class="stack-sm"></div>');
       body.appendChild(list);
-      const createBtn = B.el('<button class="btn btn-ghost btn-block">' + ui().icon('plus', 18) + ' Créer un nouvel article</button>');
+      const createBtn = B.el('<button class="btn btn-ghost btn-block">' + ui().icon('plus', 18) + ' Créer un nouveau matériel</button>');
       body.appendChild(createBtn);
       m.body.appendChild(body);
       if (m.foot) m.foot.remove();
