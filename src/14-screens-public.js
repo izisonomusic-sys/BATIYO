@@ -194,7 +194,7 @@
             <h2>Prêt à mieux gérer votre activité ?</h2>
             <p>Créez votre premier devis avec BATIYO et commencez à mieux suivre vos chantiers, vos dépenses et votre rentabilité.</p>
             <a class="btn btn-lg" href="#/register">Commencer gratuitement</a>
-            <div class="small" style="margin-top:14px;color:rgba(255,255,255,.75)">Aucune carte bancaire. Aucun paiement en ligne. Vos données restent chez vous.</div>
+            <div class="small" style="margin-top:14px;color:rgba(255,255,255,.75)">Les abonnements Pro peuvent être réglés via PayDunya SoftPay, uniquement dans les pays et pour les opérateurs activés sur le compte marchand.</div>
           </div>
         </div>
       </section>
@@ -838,7 +838,7 @@
     terms: {
       title: 'Conditions d’utilisation',
       sections: [
-        ['Objet du service', 'BATIYO est un outil de gestion destiné aux artisans et petites entreprises : création de devis et factures, suivi des chantiers, des dépenses et de la rentabilité. BATIYO ne fournit ni service de paiement, ni conseil comptable, fiscal ou juridique.'],
+        ['Objet du service', 'BATIYO est un outil de gestion destiné aux artisans et petites entreprises : création de devis et factures, suivi des chantiers, des dépenses et de la rentabilité. Les paiements d’abonnement sont traités par PayDunya via SoftPay, selon les pays et opérateurs activés sur le compte marchand. BATIYO ne fournit pas de portefeuille électronique ni de service de transfert d’argent. BATIYO ne remplace pas un conseil comptable, fiscal ou juridique.'],
         ['Compte utilisateur', 'Vous êtes responsable de l’exactitude des informations saisies et de la confidentialité de votre mot de passe. Chaque compte correspond à une entreprise et les données sont isolées entre entreprises.'],
         ['Documents générés', 'Les devis, factures et rapports générés reflètent les données que vous avez enregistrées. Vous restez responsable de leur conformité commerciale et fiscale.'],
         ['Métier et catalogue', 'Le métier choisi détermine le catalogue proposé. Les prix sont des valeurs indicatives que vous pouvez modifier librement ; les anciens documents conservent leurs propres prix.'],
@@ -864,7 +864,7 @@
         ['Contact', 'Contact : à renseigner avant la mise en service commerciale.'],
         ['Hébergement', 'Les données sont conservées dans l’espace BATIYO de l’utilisateur via Supabase et mises en cache localement pour permettre l’utilisation hors connexion.'],
         ['Propriété', 'Les marques, textes et éléments graphiques de BATIYO sont protégés. Les données saisies par l’utilisateur lui appartiennent.'],
-        ['Fonctions non disponibles', 'Cette version n’intègre aucun paiement en ligne, aucun transfert Mobile Money et aucune connexion bancaire.']
+        ['Fonctions non disponibles', 'Les abonnements BATIYO Pro peuvent être réglés via PayDunya SoftPay dans les pays et pour les opérateurs activés sur le compte marchand. Le paiement reste soumis à l’activation du compte marchand et à la disponibilité de chaque opérateur. BATIYO ne fournit pas de portefeuille électronique ni de transfert d’argent.']
       ]
     }
   };
