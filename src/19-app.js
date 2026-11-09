@@ -47,6 +47,7 @@
     { path: '/legal/:kind', public: true, screen: function (ctx) { return B.screens.legal(ctx.params.kind); } },
     { path: '/onboarding', screen: function () { return B.screens.onboarding(); } },
     { path: '/dashboard', title: 'Tableau de bord', screen: function () { return B.screens.dashboard(); } },
+    { path: '/admin', title: 'Administration BATIYO', screen: function () { return B.screens.admin(); } },
     { path: '/clients', title: 'Clients', screen: function () { return B.screens.clientsList(); } },
     { path: '/clients/:id', title: 'Fiche client', screen: function (ctx) { return B.screens.clientDetail(ctx); } },
     { path: '/catalog', title: 'Catalogue', screen: function () { return B.screens.catalog(); } },
@@ -209,7 +210,8 @@
     });
     sidebar.appendChild(B.el('<div class="spacer"></div>'));
     const foot = B.el('<div class="foot"></div>');
-    foot.innerHTML = '<a class="nav-link" href="#/settings">' + ui().icon('settings', 19) + 'Paramètres</a>' +
+    foot.innerHTML = '<a class="nav-link" href="#/admin">' + ui().icon('chart', 19) + 'Administration</a>' +
+      '<a class="nav-link" href="#/settings">' + ui().icon('settings', 19) + 'Paramètres</a>' +
       '<a class="nav-link" href="#/faq">' + ui().icon('info', 19) + 'Aide</a>' +
       '<button class="nav-link" data-logout>' + ui().icon('logout', 19) + 'Déconnexion</button>';
     B.$('[data-logout]', foot).addEventListener('click', function () {
@@ -357,7 +359,7 @@
       (user.avatar ? '<img class="avatar-img" style="width:48px;height:48px" src="' + h(user.avatar) + '" alt="">' : '<div class="avatar-initials" style="width:48px;height:48px">' + h(B.initials(user.name || '')) + '</div>') +
       '<div><div class="strong">' + h(user.name || '') + '</div><div class="tiny muted">' + h(biz ? biz.name : '') + ' · ' + h(B.session.profession().name) + '</div></div></div>'));
     const list = B.el('<div class="list"></div>');
-    [['/profile', 'Voir mon profil', 'user'], ['/settings', 'Paramètres', 'settings'], ['/assistant', 'Assistant BATIYO', 'sparkles']].forEach(function (n) {
+    [['/profile', 'Voir mon profil', 'user'], ['/settings', 'Paramètres', 'settings'], ['/assistant', 'Assistant BATIYO', 'sparkles'], ['/admin', 'Administration BATIYO', 'chart']].forEach(function (n) {
       const row = B.el('<button class="list-item"><div class="avatar neutral">' + ui().icon(n[2], 18) + '</div><div class="body"><div class="t1">' + h(n[1]) + '</div></div>' + ui().icon('chevronRight', 16) + '</button>');
       row.addEventListener('click', function () { m.close(); B.router.go(n[0]); });
       list.appendChild(row);
