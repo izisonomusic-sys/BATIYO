@@ -1,7 +1,7 @@
 /* BATIYO — Service worker (PWA, #162)
    Met en cache les fichiers de l'application pour que l'interface reste
    disponible hors connexion. Les données, elles, sont déjà locales. */
-const CACHE = 'batiyo-v6';
+const CACHE = 'batiyo-v7';
 const ASSETS = [
   './',
   './index.html',

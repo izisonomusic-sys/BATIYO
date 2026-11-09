@@ -201,6 +201,7 @@
             <div class="footer-links"><h4>BATIYO</h4>
               <a href="#fonctionnalites">Fonctionnalités</a><a href="#metiers">Métiers</a>
               <a href="#comment">Comment ça marche</a><a href="#/pricing">Nos abonnements</a>
+              <a class="btn btn-primary btn-block footer-subscribe-link" href="#/pricing">Prendre un abonnement</a>
             </div>
             <div class="footer-links"><h4>Accompagnement</h4>
               <a href="#/faq">Questions fréquentes</a><a href="#/faq">Centre d'aide</a>
