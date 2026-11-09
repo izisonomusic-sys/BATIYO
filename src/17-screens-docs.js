@@ -357,7 +357,6 @@
           id: B.uid('li'), catalog_item_id: picked.item.id, description: picked.item.name,
           quantity: 1, unit: picked.unit, unit_price: picked.price
         });
-        B.catalogService.rememberPrice(picked.item.id, picked.price);
         markDirty(); B.router.refresh();
       });
       const addFree = B.el('<button class="btn btn-ghost">' + ui().icon('edit', 17) + ' Ligne libre</button>');
