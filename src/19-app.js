@@ -65,7 +65,8 @@
     { path: '/analysis', title: 'Analyse', screen: function () { return B.screens.analysis(); } },
     { path: '/assistant', title: 'Assistant BATIYO', screen: function () { return B.screens.assistant(); } },
     { path: '/profile', title: 'Mon profil', screen: function () { return B.screens.profile(); } },
-    { path: '/settings', title: 'Paramètres', screen: function () { return B.screens.settings(); } }
+    { path: '/settings', title: 'Paramètres', screen: function () { return B.screens.settings(); } },
+    { path: '/admin', title: 'Administration BATIYO', screen: function () { return B.screens.adminDashboard(); } }
   ];
 
   const NAV = [
@@ -207,6 +208,9 @@
      ['/profile', 'Profil', 'user']].forEach(function (n) {
       sidebar.appendChild(B.el('<a class="nav-link' + (isActive(n[0]) ? ' active' : '') + '" href="#' + n[0] + '">' + ui().icon(n[2], 19) + h(n[1]) + '</a>'));
     });
+    if ((B.session.user() || {}).role === 'admin') {
+      sidebar.appendChild(B.el('<a class="nav-link" href="#/admin">' + ui().icon('shieldCheck', 19) + 'Administration</a>'));
+    }
     sidebar.appendChild(B.el('<div class="spacer"></div>'));
     const foot = B.el('<div class="foot"></div>');
     foot.innerHTML = '<a class="nav-link" href="#/settings">' + ui().icon('settings', 19) + 'Paramètres</a>' +
