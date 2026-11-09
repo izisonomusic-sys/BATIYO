@@ -112,12 +112,26 @@
     ui().toast('Devis ' + copy.number + ' créé à partir de ' + q.number + '.', 'success');
     B.router.go('/quotes/' + copy.id + '/edit');
   }
-  function deleteQuote(q) {
-    C().confirmDelete('le devis ' + q.number, function () {
-      B.quoteService.remove(q.id);
+  async function deleteQuote(q) {
+    try {
+      const ok = await ui().confirm({
+        title: 'Supprimer le devis ' + q.number + ' ?',
+        message: 'Cette action ne pourra pas être annulée.',
+        detail: 'L’historique de vos autres documents n’est pas modifié.',
+        confirmLabel: 'Supprimer',
+        tone: 'danger'
+      });
+      if (!ok) return;
+
+      const removed = B.quoteService.remove(q.id);
+      if (!removed) throw new Error('Ce devis est introuvable ou déjà supprimé.');
+
       ui().toast('Devis supprimé.', 'success');
-      B.router.refresh();
-    });
+      B.router.go('/quotes');
+    } catch (error) {
+      console.error('[BATIYO] Suppression du devis impossible :', error);
+      ui().toast(error && error.message ? error.message : 'Impossible de supprimer ce devis. Réessayez.', 'error');
+    }
   }
   function convertQuote(q) {
     ui().confirm({
