@@ -143,6 +143,9 @@ Deno.serve(async (req: Request) => {
   if (!supabaseUrl || !anonKey || !serviceKey || !masterKey || !privateKey || !paydunyaToken) {
     return json({ error: "payment_not_configured", message: "Les clés PayDunya doivent être configurées dans les secrets Supabase." }, 503);
   }
+  if (mode !== "live") {
+    return json({ error: "softpay_operator_sandbox_unavailable", message: "PayDunya documente le Sandbox SoftPay pour son portefeuille PayDunya, pas pour les opérateurs Mobile Money par pays. Les paiements T-Money, Moov, MTN, Orange, Wave, Free et autres opérateurs ne seront activés qu’en production après validation du compte marchand et des clés." }, 409);
+  }
   if (!authHeader.startsWith("Bearer ")) return json({ error: "authentication_required" }, 401);
 
   try {
