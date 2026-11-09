@@ -856,3 +856,21 @@ body.no-fab .fab-wrap { display: none; }
   .lp-footer .footer-main { grid-template-columns: 1fr; }
   .lp-footer .footer-brand { grid-column: auto; }
 }
+
+
+/* --------------------- Footer de l'espace artisan ----------------------- */
+.app-footer { margin-top: auto; }
+.app-footer .footer-main { grid-template-columns: 1.5fr repeat(3, 1fr); }
+.app-footer .footer-links a { display: block; }
+@media (max-width: 767px) {
+  .app-footer { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
+  .app-footer .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 18px; }
+  .app-footer .footer-brand { grid-column: 1 / -1; }
+}
+@media (max-width: 380px) {
+  .app-footer .footer-main { grid-template-columns: 1fr; }
+  .app-footer .footer-brand { grid-column: auto; }
+}
+@media (min-width: 1024px) {
+  .app-footer { padding-bottom: 24px; }
+}
