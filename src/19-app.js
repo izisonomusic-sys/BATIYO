@@ -67,7 +67,6 @@
     { path: '/assistant', title: 'Assistant BATIYO', screen: function () { return B.screens.assistant(); } },
     { path: '/profile', title: 'Mon profil', screen: function () { return B.screens.profile(); } },
     { path: '/settings', title: 'Paramètres', screen: function () { return B.screens.settings(); } },
-    { path: '/admin', title: 'Administration BATIYO', screen: function () { return B.screens.adminDashboard(); } }
   ];
 
   const NAV = [
@@ -214,7 +213,7 @@
     }
     sidebar.appendChild(B.el('<div class="spacer"></div>'));
     const foot = B.el('<div class="foot"></div>');
-    foot.innerHTML = '<a class="nav-link" href="#/admin">' + ui().icon('chart', 19) + 'Administration</a>' +
+    foot.innerHTML = ((B.session.user() || {}).role === 'admin' ? '<a class="nav-link" href="#/admin">' + ui().icon('chart', 19) + 'Administration</a>' : '') +
       '<a class="nav-link" href="#/settings">' + ui().icon('settings', 19) + 'Paramètres</a>' +
       '<a class="nav-link" href="#/faq">' + ui().icon('info', 19) + 'Aide</a>' +
       '<button class="nav-link" data-logout>' + ui().icon('logout', 19) + 'Déconnexion</button>';
