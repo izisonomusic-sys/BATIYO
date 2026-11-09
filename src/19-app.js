@@ -152,6 +152,12 @@
         location.hash = '/dashboard';
         return;
       }
+      /* Un utilisateur connecté ne doit jamais retomber sur la landing page.
+         Remplacer l'entrée courante évite une boucle avec le bouton Retour. */
+      if (loggedIn && path === '/') {
+        location.replace('#/dashboard');
+        return;
+      }
 
       /* Bouton flottant : uniquement sur les écrans de liste et le tableau de
          bord. Sur les écrans de détail et de saisie il masquerait les totaux
