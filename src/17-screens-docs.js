@@ -180,7 +180,7 @@
     wrap.appendChild(head);
 
     const stepper = B.el('<div class="stepper"></div>');
-    const STEPS = [['client', 'Client'], ['project', 'Chantier'], ['items', 'Éléments'], ['summary', 'Récapitulatif']];
+    const STEPS = [['client', 'Client'], ['project', 'Chantier'], ['items', 'Matériel'], ['summary', 'Récapitulatif']];
     STEPS.forEach(function (s, i) {
       const b = B.el('<button class="st' + (state.step === i + 1 ? ' active' : '') + (state.step > i + 1 ? ' done' : '') + '"><span class="n">' + (i + 1) + '</span>' + h(s[1]) + '</button>');
       b.addEventListener('click', function () { state.step = i + 1; B.router.refresh(); });
@@ -235,7 +235,7 @@
       body0.appendChild(tplCard);
 
       const options = B.el('<div class="grid grid-2" style="gap:10px"></div>');
-      const blank = B.el('<button class="card card-hover center" style="padding:18px"><div class="il" style="width:44px;height:44px;margin:0 auto 8px;border-radius:14px;background:var(--primary-soft);color:var(--primary-dark);display:grid;place-items:center">' + ui().icon('plus', 22) + '</div><div class="strong small">Devis vide</div><div class="tiny muted">Je choisis moi-même mes éléments</div></button>');
+      const blank = B.el('<button class="card card-hover center" style="padding:18px"><div class="il" style="width:44px;height:44px;margin:0 auto 8px;border-radius:14px;background:var(--primary-soft);color:var(--primary-dark);display:grid;place-items:center">' + ui().icon('plus', 22) + '</div><div class="strong small">Devis vide</div><div class="tiny muted">Je choisis moi-même le matériel</div></button>');
       blank.addEventListener('click', function () { state.step = 1; B.router.refresh(); });
       options.appendChild(blank);
       const dup = B.el('<button class="card card-hover center" style="padding:18px"><div class="il" style="width:44px;height:44px;margin:0 auto 8px;border-radius:14px;background:#F1F5F9;color:#334155;display:grid;place-items:center">' + ui().icon('copy', 22) + '</div><div class="strong small">Partir d’un ancien devis</div><div class="tiny muted">Dupliquer un devis existant</div></button>');
@@ -335,21 +335,21 @@
       navButtons(1, 3);
     }
 
-    /* ----------------------------- Étape 3 : éléments -------------------- */
+    /* ----------------------------- Étape 3 : matériel -------------------- */
     function renderItems() {
       const linesCard = B.el('<div class="card"></div>');
-      linesCard.innerHTML = '<div class="card-head"><h3>Ajouter des éléments</h3>' +
+      linesCard.innerHTML = '<div class="card-head"><h3>Ajouter du matériel</h3>' +
         '<span class="tiny muted">Catalogue ' + h(B.session.profession().name) + '</span></div>' +
         '<div class="stack-sm" data-lines></div>';
       const list = B.$('[data-lines]', linesCard);
       if (!state.doc.lines.length) {
-        list.appendChild(ui().emptyState({ icon: 'box', title: 'Aucun élément', text: 'Ajoutez vos matériaux et services : BATIYO calcule chaque ligne automatiquement.' }));
+        list.appendChild(ui().emptyState({ icon: 'box', title: 'Aucun matériel', text: 'Choisissez les matériels à ajouter au devis. Vous renseignerez vous-même l’unité, la quantité et le prix unitaire.' }));
       }
       state.doc.lines.forEach(function (line) {
         list.appendChild(C().lineEditor(line, { onChange: function () { recalc(); markDirty(); } }));
       });
       const actions = B.el('<div class="btn-row mt-12"></div>');
-      const addCatalog = B.el('<button class="btn btn-primary">' + ui().icon('plus', 17) + ' Ajouter un élément</button>');
+      const addCatalog = B.el('<button class="btn btn-primary">' + ui().icon('plus', 17) + ' Ajouter un matériel</button>');
       addCatalog.addEventListener('click', async function () {
         const picked = await C().catalogPicker();
         if (!picked) return;
@@ -378,10 +378,10 @@
       body.appendChild(linesCard);
 
       /* Recherche rapide dans le catalogue (#33, #76) */
-      const quick = B.el('<div class="card"><div class="card-head"><h3>Ajout rapide</h3><span class="tiny muted">Favoris en premier</span></div>' +
+      const quick = B.el('<div class="card"><div class="card-head"><h3>Ajout rapide de matériel</h3><span class="tiny muted">Favoris en premier</span></div>' +
         '<div class="stack-sm" data-quick></div></div>');
       const ql = B.$('[data-quick]', quick);
-      const search = B.el('<div class="search">' + ui().icon('search', 18) + '<input placeholder="Rechercher : cim, sable, fer…" aria-label="Recherche rapide"></div>');
+      const search = B.el('<div class="search">' + ui().icon('search', 18) + '<input placeholder="Rechercher un matériel : ciment, sable, fer…" aria-label="Recherche rapide de matériel"></div>');
       quick.insertBefore(search, quick.children[1]);
       function paintQuick() {
         const term = B.$('input', search).value;
@@ -391,13 +391,9 @@
         items.forEach(function (it) {
           if (seen[it.id]) return;
           seen[it.id] = 1;
-          const sugg = B.catalogService.suggestedPrice(it.id);
-          const row = B.el('<button class="picker-item" style="padding:9px 11px"><div class="grow"><div class="small strong">' + h(it.name) + '</div>' +
-            '<div class="tiny muted">' + h(B.unitLabel(it.unit)) + (sugg.source === 'last' ? ' · <span class="price-flag">Prix habituel</span>' : '') + '</div></div>' +
-            '<div class="price strong small mono">' + B.money(sugg.price) + '</div>' + ui().icon('plus', 16) + '</button>');
+          const row = B.el('<button class="picker-item" style="padding:9px 11px"><div class="grow"><div class="small strong">' + h(it.name) + '</div></div>' + ui().icon('plus', 16) + '</button>');
           row.addEventListener('click', function () {
-            state.doc.lines.push({ id: B.uid('li'), catalog_item_id: it.id, description: it.name, quantity: 1, unit: it.unit, unit_price: sugg.price });
-            B.catalogService.rememberPrice(it.id, sugg.price);
+            state.doc.lines.push({ id: B.uid('li'), catalog_item_id: it.id, description: it.name, quantity: 1, unit: '', unit_price: 0 });
             markDirty(); B.router.refresh();
           });
           ql.appendChild(row);
@@ -420,7 +416,8 @@
       back.addEventListener('click', function () { state.step = 2; B.router.refresh(); });
       const next = B.el('<button class="btn btn-primary">Continuer ' + ui().icon('chevronRight', 16) + '</button>');
       next.addEventListener('click', function () {
-        if (!state.doc.lines.length) { ui().toast('Ajoutez au moins un élément au devis.', 'error'); return; }
+        if (!state.doc.lines.length) { ui().toast('Ajoutez au moins un matériel au devis.', 'error'); return; }
+        if (state.doc.lines.some(function (line) { return !line.unit; })) { ui().toast('Choisissez une unité pour chaque matériel.', 'error'); return; }
         state.step = 4; B.router.refresh();
       });
       sticky.appendChild(back); sticky.appendChild(next);
