@@ -406,12 +406,32 @@
     return field;
   }
 
+  function googleAuthButton() {
+    const wrap = B.el('<div class="mt-12 mb-12"></div>');
+    const separator = B.el('<div class="row" style="align-items:center;gap:12px;margin:14px 0;color:var(--muted)"><span style="height:1px;background:var(--line);flex:1"></span><span class="tiny">ou continuer avec</span><span style="height:1px;background:var(--line);flex:1"></span></div>');
+    const button = B.el('<button type="button" class="btn btn-ghost btn-lg btn-block" style="border:1px solid var(--line);background:var(--surface)"><span style="font-weight:800;font-size:18px;margin-right:10px;color:#4285F4">G</span>Continuer avec Google</button>');
+    button.addEventListener('click', async function () {
+      button.disabled = true;
+      button.textContent = 'Redirection vers Google…';
+      const res = await B.authService.loginWithGoogle();
+      if (!res || !res.ok) {
+        button.disabled = false;
+        button.innerHTML = '<span style="font-weight:800;font-size:18px;margin-right:10px;color:#4285F4">G</span>Continuer avec Google';
+        ui().toast(res && res.error ? res.error : 'Connexion Google impossible. Vérifiez la configuration Supabase.', 'error');
+      }
+    });
+    wrap.appendChild(separator);
+    wrap.appendChild(button);
+    return wrap;
+  }
+
   /* --------------------------------- Connexion ---------------------------- */
   function login() {
     return authLayout({
       title: 'Content de vous revoir',
       subtitle: 'Connectez-vous avec votre numéro de téléphone et votre mot de passe.',
       form: function (form) {
+        form.appendChild(googleAuthButton());
         form.appendChild(ui().field({ label: 'Numéro de téléphone', name: 'phone', type: 'tel', placeholder: '+228 90 12 34 56', required: true, autocomplete: 'tel' }));
         form.appendChild(passwordField('Mot de passe', 'password', 'Votre mot de passe', 'current-password'));
         const help = B.el('<div class="tiny muted">Utilisez votre numéro avec l’indicatif international (ex. +228 pour le Togo).</div>');
@@ -438,6 +458,7 @@
       subtitle: 'Quelques informations suffisent pour commencer à gérer votre activité.',
       wide: true,
       form: function (form) {
+        form.appendChild(googleAuthButton());
         form.appendChild(ui().field({ label: 'Prénom', name: 'first_name', required: true, placeholder: 'Ex. : Kossi', autocomplete: 'given-name' }));
         form.appendChild(ui().field({ label: 'Nom', name: 'last_name', required: true, placeholder: 'Ex. : Amégan', autocomplete: 'family-name' }));
         form.appendChild(ui().field({ label: 'Numéro de téléphone', name: 'phone', type: 'tel', required: true, placeholder: '+228 90 12 34 56', autocomplete: 'tel', hint: 'Avec indicatif international, sans adresse e-mail et sans code SMS.' }));
