@@ -11,6 +11,13 @@
   B.CURRENCY = 'FCFA';
   B.LOCALE = 'fr-FR';
 
+  /* Supabase BATIYO — clé publique uniquement (aucune clé secrète côté navigateur). */
+  B.SUPABASE_CONFIG = {
+    url: 'https://vrqwvynujpimgamrcllj.supabase.co',
+    publishableKey: 'sb_publishable_xqrupvjiSINb6_-a9a8KAA_0W8i-Z14',
+    tables: []
+  };
+
   /* ------------------------------- Unités (#31) --------------------------- */
   B.UNITS = [
     { id: 'sac', label: 'sac' },
