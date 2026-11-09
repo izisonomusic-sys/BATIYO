@@ -42,6 +42,7 @@
     { path: '/login', public: true, screen: function () { return B.screens.login(); } },
     { path: '/register', public: true, screen: function () { return B.screens.register(); } },
     { path: '/pricing', public: true, screen: function () { return B.screens.pricing(); } },
+    { path: '/subscribe/:plan', public: true, screen: function (ctx) { return B.screens.subscribe(ctx.params.plan); } },
     { path: '/faq', public: true, screen: function () { return B.screens.faq(); } },
     { path: '/legal/:kind', public: true, screen: function (ctx) { return B.screens.legal(ctx.params.kind); } },
     { path: '/onboarding', screen: function () { return B.screens.onboarding(); } },
