@@ -8,6 +8,18 @@
   const h = B.escape;
   const ui = function () { return B.ui; };
 
+  /* Actions d’en-tête adaptées à l’état de connexion. */
+  function publicAccountActions() {
+    return B.session && B.session.isLoggedIn()
+      ? '<a class="btn btn-primary btn-sm" href="#/dashboard">Mon espace</a>'
+      : '<a class="btn btn-ghost hide-sm" href="#/login">Se connecter</a><a class="btn btn-primary btn-sm" href="#/register"><span class="hide-xs">Commencer gratuitement</span><span class="only-xs">Commencer</span></a>';
+  }
+  function publicMobileAccountLinks() {
+    return B.session && B.session.isLoggedIn()
+      ? '<a href="#/dashboard">Mon espace</a>'
+      : '<a href="#/login">Se connecter</a><a href="#/register">Créer un compte</a>';
+  }
+
   /* ------------------------------- Landing page --------------------------- */
   function landing() {
     const wrap = B.el('<div class="lp"></div>');
@@ -205,7 +217,7 @@
             </div>
             <div class="footer-links"><h4>Accompagnement</h4>
               <a href="#/faq">Questions fréquentes</a><a href="#/faq">Centre d'aide</a>
-              <a href="#/login">Mon espace</a><a href="#/register">Créer un compte</a>
+              ${publicMobileAccountLinks()}
             </div>
             <div class="footer-links"><h4>Informations</h4>
               <a href="#/legal/terms">Conditions d'utilisation</a><a href="#/legal/privacy">Confidentialité</a>
