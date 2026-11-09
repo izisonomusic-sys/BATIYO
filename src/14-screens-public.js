@@ -36,8 +36,7 @@
               <a href="#/faq">FAQ</a>
             </nav>
             <div class="lp-actions">
-              <a class="btn btn-ghost hide-sm" href="#/login">Se connecter</a>
-              <a class="btn btn-primary btn-sm" href="#/register"><span class="hide-xs">Commencer gratuitement</span><span class="only-xs">Commencer</span></a>
+              ${publicAccountActions()}
               <button class="iconbtn only-sm" id="menuBtn" aria-label="Ouvrir le menu">${ui().icon('menu', 20)}</button>
             </div>
           </div>
@@ -50,7 +49,7 @@
         <a href="#comment">Comment ça marche</a>
         <a href="#/pricing">Tarifs</a>
         <a href="#/faq">FAQ</a>
-        <a href="#/login">Se connecter</a>
+        ${publicMobileAccountLinks()}
       </div>`);
     wrap.appendChild(header);
     wrap.appendChild(mobileMenu);
@@ -778,8 +777,7 @@
             <a href="#/faq">FAQ</a>
           </nav>
           <div class="lp-actions">
-            <a class="btn btn-ghost" href="#/login">Se connecter</a>
-            <a class="btn btn-primary btn-sm" href="#/register">Commencer gratuitement</a>
+            ${publicAccountActions()}
           </div>
         </div></div>
       </header>
