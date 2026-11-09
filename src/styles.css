@@ -884,7 +884,7 @@ body.no-fab .fab-wrap { display: none; }
   line-height: 1.5;
 }
 .lp-footer .footer-founder strong { color: #fff; font-weight: 700; }
-.app-footer .footer-subscribe-link {
+.lp-footer .footer-subscribe-link {
   display: inline-flex;
   width: 100%;
   justify-content: center;
@@ -896,11 +896,11 @@ body.no-fab .fab-wrap { display: none; }
   border-radius: 10px;
   white-space: normal;
 }
-.app-footer .footer-subscribe-link:hover {
+.lp-footer .footer-subscribe-link:hover {
   color: #fff;
   transform: translateY(-1px);
   text-decoration: none;
 }
 @media (max-width: 767px) {
-  .app-footer .footer-subscribe-link { max-width: 260px; }
+  .lp-footer .footer-subscribe-link { max-width: 260px; }
 }
