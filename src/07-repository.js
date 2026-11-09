@@ -540,9 +540,10 @@
       const invoices = results[12].map(function(i){ return invoiceToLocal(i, results[13], results[14]); });
       const users = [{
         id: user.id,
-        identifier: user.email || '',
+        identifier: user.phone || '',
+        phone: user.phone || (user.user_metadata && user.user_metadata.phone) || '',
         email: user.email || '',
-        name: profiles[0] && profiles[0].full_name ? profiles[0].full_name : (user.user_metadata && user.user_metadata.name) || '',
+        name: profiles[0] && profiles[0].full_name ? profiles[0].full_name : (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || '',
         profession_id: profiles[0] ? profiles[0].profession_id : null,
         business_id: businessId,
         role: profiles[0] ? profiles[0].role : 'proprietaire',
@@ -608,8 +609,8 @@
       signUp: async function (payload) {
         return ensure().auth.signUp(payload);
       },
-      signIn: async function (email, password) {
-        return ensure().auth.signInWithPassword({ email: email, password: password });
+      signIn: async function (phone, password) {
+        return ensure().auth.signInWithPassword({ phone: phone, password: password });
       },
       signOut: async function () { return ensure().auth.signOut(); },
       resetPassword: async function (email, redirectTo) {
@@ -678,14 +679,5 @@
     markLocalSynced: function () { this.local.markSynced(); }
   };
 
-  B.SUPABASE_CONFIG = {
-    url: 'https://oawalbnivqcuzbvhuvnc.supabase.co',
-    publishableKey: 'sb_publishable_ZqIxoXQC-nlzhFA3sXAmdA_qYX2Bbtp',
-    tables: [
-      'professions','catalog_categories','expense_categories','units','businesses','profiles','settings',
-      'catalog_items','clients','projects','quotes','quote_items','invoices','invoice_items','payments',
-      'expenses','documents','photos','notifications','assistant_messages','suppliers','purchases',
-      'purchase_items'
-    ]
-  };
+  /* La configuration est définie une seule fois dans src/01-config.js. */
 })(globalThis.BATIYO = globalThis.BATIYO || {});
