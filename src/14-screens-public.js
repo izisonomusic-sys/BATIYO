@@ -137,28 +137,6 @@
             ${step('03', 'Suivez vos dépenses', 'Enregistrez vos achats au fur et à mesure, chantier par chantier.')}
             ${step('04', 'Analysez votre résultat', 'BATIYO compare le budget, les dépenses réelles et la marge.')}
           </div>
-          <div class="grid grid-2 mt-24" style="align-items:center">
-            <div class="card card-pad-lg">
-              <h3>Du devis au chantier, sans ressaisie</h3>
-              <p class="muted mt-8">Quand un client accepte votre devis, BATIYO crée le chantier avec le budget prévisionnel, puis suit vos dépenses réelles et vous montre l'écart.</p>
-              <div class="divider"></div>
-              ${ui().kv('Devis accepté', B.money(3500000))}
-              ${ui().kv('Budget prévisionnel', B.money(2900000))}
-              ${ui().kv('Dépenses réelles', B.money(2150000), 'tone-warn')}
-              ${ui().kv('Résultat provisoire', B.money(1350000), 'tone-success')}
-              <div class="help-text mt-12">Estimation basée sur les données enregistrées.</div>
-            </div>
-            <div class="card card-pad-lg">
-              <h3>Les statuts suivent votre réalité</h3>
-              <div class="stack-sm mt-12">
-                <div class="row-between"><span class="small muted">Devis</span><span>${['Brouillon', 'Envoyé', 'Vu', 'Accepté', 'Refusé', 'Converti', 'Expiré'].map(function (s, i) { return ui().badge(s, ['neutral', 'info', 'info', 'success', 'danger', 'accent', 'warn'][i]); }).join(' ')}</span></div>
-                <div class="row-between"><span class="small muted">Factures</span><span>${['Brouillon', 'Émise', 'Partielle', 'Payée', 'En retard'].map(function (s, i) { return ui().badge(s, ['neutral', 'info', 'warn', 'success', 'danger'][i]); }).join(' ')}</span></div>
-                <div class="row-between"><span class="small muted">Chantiers</span><span>${['Planifié', 'En cours', 'Terminé', 'Annulé'].map(function (s, i) { return ui().badge(s, ['info', 'accent', 'success', 'neutral'][i]); }).join(' ')}</span></div>
-              </div>
-              <div class="divider"></div>
-              <p class="muted small">Vous gardez toujours la main : chaque action importante vous demande confirmation.</p>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -264,6 +242,7 @@
               <a href="#devis-intelligent">Factures</a>
               <a href="#comment">Chantiers</a>
               <a href="#depenses-maitrisees">Dépenses</a>
+              <a href="#/pricing">${ui().icon('creditCard', 16)} Abonnement</a>
             </div>
             <div>
               <h4>Entreprise</h4>
