@@ -123,11 +123,11 @@
       const errors = {};
       const firstName = String(form.first_name || '').trim();
       const lastName = String(form.last_name || '').trim();
-      const phone = String(form.phone || '').replace(/[\\s().-]/g, '').replace(/^00/, '+');
+      const phone = String(form.phone || '').replace(/[\s().-]/g, '').replace(/^00/, '+');
       const fullName = [firstName, lastName].filter(Boolean).join(' ');
       if (firstName.length < 2) errors.first_name = 'Indiquez votre prénom.';
       if (lastName.length < 2) errors.last_name = 'Indiquez votre nom.';
-      if (!/^\\+[1-9]\\d{7,14}$/.test(phone)) errors.phone = 'Saisissez le numéro au format international, par exemple +22890123456.';
+      if (!/^\+[1-9]\d{7,14}$/.test(phone)) errors.phone = 'Saisissez le numéro au format international, par exemple +22890123456.';
       if (!form.password || form.password.length < 6) errors.password = 'Le mot de passe doit contenir au moins 6 caractères.';
       if (!form.business_name || form.business_name.trim().length < 2) errors.business_name = 'Indiquez le nom de votre entreprise.';
       if (!form.profession_id) errors.profession_id = 'Choisissez votre métier.';
@@ -161,8 +161,8 @@
       }
     },
     login: async function (phone, password) {
-      const normalizedPhone = String(phone || '').replace(/[\\s().-]/g, '').replace(/^00/, '+');
-      if (!/^\\+[1-9]\\d{7,14}$/.test(normalizedPhone)) return { ok: false, error: 'Saisissez votre numéro au format international, par exemple +22890123456.' };
+      const normalizedPhone = String(phone || '').replace(/[\s().-]/g, '').replace(/^00/, '+');
+      if (!/^\+[1-9]\d{7,14}$/.test(normalizedPhone)) return { ok: false, error: 'Saisissez votre numéro au format international, par exemple +22890123456.' };
       if (!B.DataRepository.remote || !B.DataRepository.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré.' };
       try {
         const res = await B.DataRepository.remote.signIn(normalizedPhone, password);
