@@ -599,7 +599,7 @@
           return false;
         }
         client = sdk.createClient(cfg.url, cfg.publishableKey, {
-          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
         });
         ready = true;
         return true;
@@ -612,6 +612,9 @@
       },
       signIn: async function (phone, password) {
         return ensure().auth.signInWithPassword({ phone: phone, password: password });
+      },
+      signInWithOAuth: async function (provider, options) {
+        return ensure().auth.signInWithOAuth({ provider: provider, options: options || {} });
       },
       signOut: async function () { return ensure().auth.signOut(); },
       resetPassword: async function (email, redirectTo) {
