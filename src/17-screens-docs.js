@@ -92,7 +92,7 @@
       { label: 'Voir le devis', icon: 'doc', onClick: function () { B.router.go('/quotes/' + q.id); } },
       { label: 'Modifier', icon: 'edit', onClick: function () { B.router.go('/quotes/' + q.id + '/edit'); } },
       { label: 'Dupliquer', icon: 'copy', onClick: function () { duplicateQuote(q); } },
-      { label: 'Télécharger le PDF', icon: 'download', onClick: function () { B.pdf.openPreview(B.pdf.quoteHTML(q), { filename: q.number }); } },
+      { label: 'Télécharger le PDF', icon: 'download', onClick: function () { B.pdf.openPreview(B.pdf.quoteHTML(q), { filename: q.number, documentType: 'quote', documentId: q.id }); } },
       { label: 'Partager', icon: 'share', onClick: function () { B.components.shareDialog('quote', q); } },
       {
         label: 'Convertir en facture', icon: 'invoice', hint: 'Crée une facture à partir de ce devis',
@@ -758,7 +758,7 @@
     return ui().actionsMenu([
       { label: 'Voir la facture', icon: 'invoice', onClick: function () { B.router.go('/invoices/' + inv.id); } },
       { label: 'Enregistrer un paiement', icon: 'wallet', hidden: sum.remaining <= 0, onClick: function () { paymentForm(inv); } },
-      { label: 'Télécharger le PDF', icon: 'download', onClick: function () { B.pdf.openPreview(B.pdf.invoiceHTML(inv), { filename: inv.number }); } },
+      { label: 'Télécharger le PDF', icon: 'download', onClick: function () { B.pdf.openPreview(B.pdf.invoiceHTML(inv), { filename: inv.number, documentType: 'invoice', documentId: inv.id }); } },
       { label: 'Partager', icon: 'share', onClick: function () { B.components.shareDialog('invoice', inv); } },
       { label: 'Dupliquer', icon: 'copy', onClick: function () {
           const copy = B.invoiceService.duplicate(inv.id);
