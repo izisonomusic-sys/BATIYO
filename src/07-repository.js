@@ -432,6 +432,10 @@
         const delQuote = await ensure().from('quotes').delete()
           .eq('id', q.id).eq('business_id', businessId).select('id');
         if (delQuote.error) throw delQuote.error;
+        const quoteStillExists = await ensure().from('quotes').select('id')
+          .eq('id', q.id).eq('business_id', businessId).maybeSingle();
+        if (quoteStillExists.error) throw quoteStillExists.error;
+        if (quoteStillExists.data) throw new Error('Supabase a refusé la suppression du devis ' + q.id + '.');
       }
 
       const quotes = allQuotes.filter(function(q){ return !q.deleted_at; });
@@ -474,6 +478,10 @@
         const delInvoice = await ensure().from('invoices').delete()
           .eq('id', inv.id).eq('business_id', businessId).select('id');
         if (delInvoice.error) throw delInvoice.error;
+        const invoiceStillExists = await ensure().from('invoices').select('id')
+          .eq('id', inv.id).eq('business_id', businessId).maybeSingle();
+        if (invoiceStillExists.error) throw invoiceStillExists.error;
+        if (invoiceStillExists.data) throw new Error('Supabase a refusé la suppression de la facture ' + inv.id + '.');
       }
       const invoices = allInvoices.filter(function(i){ return !i.deleted_at; });
       if (invoices.length) {
