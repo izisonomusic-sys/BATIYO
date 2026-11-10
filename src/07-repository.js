@@ -567,10 +567,12 @@
       /* Préserver les tombstones locaux tant que la suppression distante n'a
          pas été confirmée : une réhydratation ne doit pas ressusciter le document. */
       (db.quotes || []).filter(function(q){ return !!q.deleted_at; }).forEach(function(q){
-        if (!quotes.some(function(remote){ return remote.id === q.id; })) quotes.push(q);
+        const index = quotes.findIndex(function(remote){ return remote.id === q.id; });
+        if (index >= 0) quotes[index] = q; else quotes.push(q);
       });
       (db.invoices || []).filter(function(i){ return !!i.deleted_at; }).forEach(function(i){
-        if (!invoices.some(function(remote){ return remote.id === i.id; })) invoices.push(i);
+        const index = invoices.findIndex(function(remote){ return remote.id === i.id; });
+        if (index >= 0) invoices[index] = i; else invoices.push(i);
       });
       const users = [{
         id: user.id,
