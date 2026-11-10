@@ -126,8 +126,15 @@
       const removed = B.quoteService.remove(q.id);
       if (!removed) throw new Error('Ce devis est introuvable ou déjà supprimé.');
 
-      ui().toast('Devis supprimé.', 'success');
+      let synced = false;
+      try {
+        const result = await B.DataRepository.syncNow();
+        synced = !!(result && result.ok);
+      } catch (syncError) {
+        console.error('[BATIYO] Synchronisation de la suppression du devis en attente :', syncError);
+      }
       B.router.go('/quotes');
+      ui().toast(synced ? 'Devis supprimé.' : 'Devis retiré de la liste. La synchronisation sera réessayée dès que la connexion sera disponible.', synced ? 'success' : 'error');
     } catch (error) {
       console.error('[BATIYO] Suppression du devis impossible :', error);
       ui().toast(error && error.message ? error.message : 'Impossible de supprimer ce devis. Réessayez.', 'error');
@@ -763,6 +770,33 @@
     return wrap;
   }
 
+  async function deleteInvoice(inv) {
+    try {
+      const ok = await ui().confirm({
+        title: 'Supprimer la facture ' + inv.number + ' ?',
+        message: 'Cette action ne pourra pas être annulée.',
+        detail: 'Les paiements et les lignes de cette facture seront également supprimés. Le devis d’origine, s’il existe, sera conservé.',
+        confirmLabel: 'Supprimer',
+        tone: 'danger'
+      });
+      if (!ok) return;
+      const removed = B.invoiceService.remove(inv.id);
+      if (!removed) throw new Error('Cette facture est introuvable ou déjà supprimée.');
+      let synced = false;
+      try {
+        const result = await B.DataRepository.syncNow();
+        synced = !!(result && result.ok);
+      } catch (syncError) {
+        console.error('[BATIYO] Synchronisation de la suppression de la facture en attente :', syncError);
+      }
+      B.router.go('/invoices');
+      ui().toast(synced ? 'Facture supprimée.' : 'Facture retirée de la liste. La synchronisation sera réessayée dès que la connexion sera disponible.', synced ? 'success' : 'error');
+    } catch (error) {
+      console.error('[BATIYO] Suppression de la facture impossible :', error);
+      ui().toast(error && error.message ? error.message : 'Impossible de supprimer cette facture. Réessayez.', 'error');
+    }
+  }
+
   function invoiceMenu(inv) {
     const sum = B.calc.invoiceSummary(inv);
     return ui().actionsMenu([
@@ -775,11 +809,7 @@
           ui().toast('Facture ' + copy.number + ' créée.', 'success');
           B.router.go('/invoices/' + copy.id);
         } },
-      { label: 'Supprimer', icon: 'trash', tone: 'danger', onClick: function () {
-          C().confirmDelete('la facture ' + inv.number, function () {
-            B.invoiceService.remove(inv.id); ui().toast('Facture supprimée.', 'success'); B.router.refresh();
-          });
-        } }
+      { label: 'Supprimer', icon: 'trash', tone: 'danger', onClick: function () { deleteInvoice(inv); } }
     ]);
   }
 
@@ -898,9 +928,7 @@
       ui().confirm({ title: 'Annuler la facture ' + inv.number + ' ?', message: 'La facture sera marquée comme annulée mais restera dans votre historique.', confirmLabel: 'Annuler la facture' })
         .then(function (ok) { if (ok) { B.invoiceService.setStatus(inv.id, 'annulee'); ui().toast('Facture annulée.', 'success'); B.router.refresh(); } });
     });
-    B.$('[data-del]', danger).addEventListener('click', function () {
-      C().confirmDelete('la facture ' + inv.number, function () { B.invoiceService.remove(inv.id); ui().toast('Facture supprimée.', 'success'); B.router.go('/invoices'); });
-    });
+    B.$('[data-del]', danger).addEventListener('click', function () { deleteInvoice(inv); });
     wrap.appendChild(danger);
 
     B.$('[data-back]', wrap).addEventListener('click', function () { B.router.go('/invoices'); });

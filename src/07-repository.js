@@ -432,6 +432,10 @@
         const delQuote = await ensure().from('quotes').delete()
           .eq('id', q.id).eq('business_id', businessId).select('id');
         if (delQuote.error) throw delQuote.error;
+        const quoteStillExists = await ensure().from('quotes').select('id')
+          .eq('id', q.id).eq('business_id', businessId).maybeSingle();
+        if (quoteStillExists.error) throw quoteStillExists.error;
+        if (quoteStillExists.data) throw new Error('Supabase a refusé la suppression du devis ' + q.id + '.');
       }
 
       const quotes = allQuotes.filter(function(q){ return !q.deleted_at; });
@@ -462,7 +466,24 @@
         }
       }
 
-      const invoices = (db.invoices || []).filter(function(i){ return i.business_id === businessId; });
+      /* Une facture supprimée doit être effacée à distance avant toute
+         réhydratation, sinon son ancien enregistrement peut réapparaître. */
+      const allInvoices = (db.invoices || []).filter(function(i){ return i.business_id === businessId; });
+      const deletedInvoices = allInvoices.filter(function(i){ return !!i.deleted_at; });
+      for (const inv of deletedInvoices) {
+        const delPayments = await ensure().from('payments').delete().eq('invoice_id', inv.id).eq('business_id', businessId);
+        if (delPayments.error) throw delPayments.error;
+        const delItems = await ensure().from('invoice_items').delete().eq('invoice_id', inv.id).eq('business_id', businessId);
+        if (delItems.error) throw delItems.error;
+        const delInvoice = await ensure().from('invoices').delete()
+          .eq('id', inv.id).eq('business_id', businessId).select('id');
+        if (delInvoice.error) throw delInvoice.error;
+        const invoiceStillExists = await ensure().from('invoices').select('id')
+          .eq('id', inv.id).eq('business_id', businessId).maybeSingle();
+        if (invoiceStillExists.error) throw invoiceStillExists.error;
+        if (invoiceStillExists.data) throw new Error('Supabase a refusé la suppression de la facture ' + inv.id + '.');
+      }
+      const invoices = allInvoices.filter(function(i){ return !i.deleted_at; });
       if (invoices.length) {
         await upsert('invoices', invoices.map(function(i){ return cleanGeneric(i, ['lines', 'payments', 'paid']); }));
         const invoiceItems = [];
@@ -551,6 +572,16 @@
       const profiles = results[1].map(mapProfile);
       const quotes = results[10].map(function(q){ return quoteToLocal(q, results[11]); });
       const invoices = results[12].map(function(i){ return invoiceToLocal(i, results[13], results[14]); });
+      /* Préserver les tombstones locaux tant que la suppression distante n'a
+         pas été confirmée : une réhydratation ne doit pas ressusciter le document. */
+      (db.quotes || []).filter(function(q){ return !!q.deleted_at; }).forEach(function(q){
+        const index = quotes.findIndex(function(remote){ return remote.id === q.id; });
+        if (index >= 0) quotes[index] = q; else quotes.push(q);
+      });
+      (db.invoices || []).filter(function(i){ return !!i.deleted_at; }).forEach(function(i){
+        const index = invoices.findIndex(function(remote){ return remote.id === i.id; });
+        if (index >= 0) invoices[index] = i; else invoices.push(i);
+      });
       const users = [{
         id: user.id,
         identifier: user.phone || '',

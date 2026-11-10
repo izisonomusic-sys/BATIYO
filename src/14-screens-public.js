@@ -839,12 +839,22 @@
       ['Mes données sont-elles isolées ?', 'Oui. Chaque entreprise possède ses propres clients, devis, factures, chantiers et dépenses. Les données sont enregistrées sur votre appareil et une synchronisation sécurisée est prévue.'],
       ['BATIYO fait-il de la comptabilité ?', 'Non. BATIYO fournit des calculs opérationnels (budget, dépenses, marge estimée, résultat provisoire). Ce n’est pas un logiciel de comptabilité et cela ne remplace pas un comptable.']
     ];
-    return publicPage('FAQ', 'Les réponses aux questions les plus fréquentes.', '<div class="mt-16">' + items.map(function (it) { return faqItem(it[0], it[1]); }).join('') + '</div>', true);
+    const page = publicPage('FAQ', 'Les réponses aux questions les plus fréquentes.', '<div class="mt-16">' + items.map(function (it) { return faqItem(it[0], it[1]); }).join('') + '</div>', true);
+    /* Les éléments FAQ sont créés via HTML dans publicPage : on attache donc
+       les événements après insertion dans le vrai DOM de la page retournée. */
+    page.querySelectorAll('.faq-q').forEach(function (button) {
+      button.setAttribute('aria-expanded', 'false');
+      button.addEventListener('click', function () {
+        const item = button.closest('.faq-item');
+        if (!item) return;
+        const open = item.classList.toggle('open');
+        button.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+    return page;
   }
   function faqItem(q, a) {
-    const el = B.el('<div class="faq-item"><button class="faq-q">' + h(q) + '<span class="chev">' + ui().icon('chevronDown', 18) + '</span></button><div class="faq-a">' + h(a) + '</div></div>');
-    B.$('.faq-q', el).addEventListener('click', function () { el.classList.toggle('open'); });
-    return el.outerHTML;
+    return '<div class="faq-item"><button type="button" class="faq-q" aria-expanded="false">' + h(q) + '<span class="chev">' + ui().icon('chevronDown', 18) + '</span></button><div class="faq-a">' + h(a) + '</div></div>';
   }
 
   /* -------------------------------- Pages légales ------------------------- */
