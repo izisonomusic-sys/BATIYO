@@ -231,7 +231,9 @@
   B.quoteService = {
     list: function (filters) {
       const f = filters || {};
-      let rows = mine(repo().table('quotes'));
+      /* Les lignes supprimées restent dans le cache pour synchroniser le DELETE distant,
+         mais elles ne doivent jamais réapparaître dans les listes métier. */
+      let rows = mine(repo().table('quotes')).filter(function (q) { return !q.deleted_at; });
       if (f.status && f.status !== 'all') rows = rows.filter(function (q) { return q.status === f.status; });
       if (f.client_id) rows = rows.filter(function (q) { return q.client_id === f.client_id; });
       if (f.project_id) rows = rows.filter(function (q) { return q.project_id === f.project_id; });
