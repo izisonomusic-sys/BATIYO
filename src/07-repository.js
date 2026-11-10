@@ -462,7 +462,20 @@
         }
       }
 
-      const invoices = (db.invoices || []).filter(function(i){ return i.business_id === businessId; });
+      /* Une facture supprimée doit être effacée à distance avant toute
+         réhydratation, sinon son ancien enregistrement peut réapparaître. */
+      const allInvoices = (db.invoices || []).filter(function(i){ return i.business_id === businessId; });
+      const deletedInvoices = allInvoices.filter(function(i){ return !!i.deleted_at; });
+      for (const inv of deletedInvoices) {
+        const delPayments = await ensure().from('payments').delete().eq('invoice_id', inv.id).eq('business_id', businessId);
+        if (delPayments.error) throw delPayments.error;
+        const delItems = await ensure().from('invoice_items').delete().eq('invoice_id', inv.id).eq('business_id', businessId);
+        if (delItems.error) throw delItems.error;
+        const delInvoice = await ensure().from('invoices').delete()
+          .eq('id', inv.id).eq('business_id', businessId).select('id');
+        if (delInvoice.error) throw delInvoice.error;
+      }
+      const invoices = allInvoices.filter(function(i){ return !i.deleted_at; });
       if (invoices.length) {
         await upsert('invoices', invoices.map(function(i){ return cleanGeneric(i, ['lines', 'payments', 'paid']); }));
         const invoiceItems = [];
