@@ -408,7 +408,7 @@
   B.invoiceService = {
     list: function (filters) {
       const f = filters || {};
-      let rows = mine(repo().table('invoices'));
+      let rows = mine(repo().table('invoices')).filter(function (i) { return !i.deleted_at; });
       if (f.status && f.status !== 'all') {
         rows = rows.filter(function (i) { return B.calc.invoiceSummary(i).status === f.status; });
       }
