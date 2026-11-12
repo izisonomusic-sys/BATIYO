@@ -659,13 +659,19 @@
       db.invoices = invoices;
       db.expenses = await Promise.all(results[15].map(async function(x){
         const path = x.receipt_url || null;
-        const signed = path && !/^https?:\/\//.test(path) && !/^data:/.test(path) ? await signedStorageUrl('receipts', path) : path;
+        let signed = path;
+        if (path && !/^https?:\/\//.test(path) && !/^data:/.test(path)) {
+          try { signed = await signedStorageUrl('receipts', path); } catch (e) { signed = path; }
+        }
         return Object.assign({}, x, { receipt: signed || path || null, receipt_path: path });
       }));
       db.documents = results[16];
       db.photos = await Promise.all(results[17].map(async function(x){
         const path = x.file_url || null;
-        const signed = path && !/^https?:\/\//.test(path) && !/^data:/.test(path) ? await signedStorageUrl('photos', path) : path;
+        let signed = path;
+        if (path && !/^https?:\/\//.test(path) && !/^data:/.test(path)) {
+          try { signed = await signedStorageUrl('photos', path); } catch (e) { signed = path; }
+        }
         return Object.assign({}, x, { file_url: signed || path, storage_path: path, date: x.date || (x.taken_at ? String(x.taken_at).slice(0,10) : null) });
       }));
       db.notifications = results[18].map(function(x){ return Object.assign({}, x, { key: x.payload && x.payload.key ? x.payload.key : x.key, project_id: x.payload && x.payload.project_id ? x.payload.project_id : x.project_id }); });
