@@ -107,12 +107,12 @@
     }
     window.addEventListener('error', function (event) {
       if (event && event.target && event.target !== window) return;
-      showError('Une erreur JavaScript a interrompu BATIYO. Rechargez la page ; si le problème continue, transmettez ce message au support.');
+      var err = event && event.error; var detail = (event && event.message) || (err && err.message) || 'Erreur JavaScript inconnue'; var where = event && event.filename ? ' | fichier: ' + event.filename.split('/').pop() + ' | ligne: ' + event.lineno + ' | colonne: ' + event.colno : ''; var stack = err && err.stack ? ' | pile: ' + String(err.stack).slice(0, 900) : ''; showError('Diagnostic : ' + detail + where + stack);
     });
     window.addEventListener('unhandledrejection', function (event) {
       var reason = event && event.reason;
       var detail = reason && reason.message ? reason.message : String(reason || '');
-      showError(detail ? 'Erreur de démarrage : ' + detail : 'Une opération de démarrage a échoué. Rechargez la page pour réessayer.');
+      var stack = reason && reason.stack ? ' | pile: ' + String(reason.stack).slice(0, 900) : ''; showError(detail ? 'Erreur de démarrage : ' + detail + stack : 'Une opération de démarrage a échoué. Rechargez la page pour réessayer.');
     });
     check();
   })();
