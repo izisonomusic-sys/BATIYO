@@ -72,18 +72,38 @@
 <script src="src/20-screens-admin.js"></script>
 <script src="src/19-app.js"></script>
 <script>
-  /* Retrait de l'écran de démarrage dès que l'application est montée */
+  /* Ne jamais retirer l'écran de démarrage si le routeur n'existe pas :
+     cela transformait une erreur JavaScript en page blanche silencieuse. */
   (function () {
-    function done() { var b = document.getElementById('boot'); if (b) b.remove(); }
-    if (window.BATIYO && window.BATIYO.router) done();
-    else setTimeout(function () {
-      if (window.BATIYO && window.BATIYO.router) done();
-      else setTimeout(done, 900);
-    }, 120);
-    window.addEventListener('error', function () {
-      var b = document.getElementById('boot');
-      if (b) b.innerHTML = '<div class="b"><strong>BATIYO n’a pas pu démarrer</strong><div style="margin-top:8px">Vérifiez que tous les fichiers du dossier <code>src/</code> sont présents, puis rechargez la page.</div></div>';
+    var attempts = 0;
+    function showError(message) {
+      var boot = document.getElementById('boot');
+      if (!boot) return;
+      boot.innerHTML = '<div class="b" style="max-width:340px;padding:24px"><strong style="color:#0F172A">BATIYO n’a pas pu démarrer</strong><div style="margin-top:10px">' +
+        (message || 'Le chargement de l’application a rencontré un problème.') +
+        '</div><button type="button" onclick="window.location.reload()" style="margin-top:18px;padding:11px 18px;border:0;border-radius:10px;background:#0F766E;color:#fff;font-weight:700">Réessayer</button></div>';
+    }
+    function check() {
+      if (window.BATIYO && window.BATIYO.router) {
+        var boot = document.getElementById('boot');
+        if (boot) boot.remove();
+        return;
+      }
+      attempts += 1;
+      if (attempts >= 120) {
+        showError('Le démarrage prend trop de temps. Vérifiez votre connexion Internet puis appuyez sur Réessayer.');
+        return;
+      }
+      setTimeout(check, 100);
+    }
+    window.addEventListener('error', function (event) {
+      if (event && event.target && event.target !== window) return;
+      showError('Une erreur JavaScript a empêché le démarrage. Rechargez la page pour réessayer.');
     });
+    window.addEventListener('unhandledrejection', function () {
+      /* Une erreur distante ne doit pas masquer l'interface déjà montée. */
+    });
+    check();
   })();
 </script>
 </body>
