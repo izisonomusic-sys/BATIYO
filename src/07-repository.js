@@ -566,7 +566,7 @@
       db.businesses = businesses;
       db.meta.remote = true;
       local().importDB(db);
-      return { ok: true, user: users[0], business: businesses[0] || null };
+      return { ok: loadErrors.length === 0, partial: loadErrors.length > 0, errors: loadErrors, user: users[0], business: businesses[0] || null };
     }
 
     async function hydrate(businessId) {
@@ -575,7 +575,14 @@
       const user = (await ensure().auth.getUser()).data.user;
       if (!user) return { ok: false, error: 'Utilisateur non authentifié.' };
 
-      const results = await Promise.all([
+      const tableNames = [
+        'businesses','profiles','settings','professions','catalog_categories',
+        'expense_categories','units','catalog_items','clients','projects',
+        'quotes','quote_items','invoices','invoice_items','payments','expenses',
+        'documents','photos','notifications','assistant_messages','suppliers',
+        'purchases','purchase_items'
+      ];
+      const requests = [
         fetchRows('businesses', q => q.eq('id', businessId).limit(1)),
         fetchRows('profiles', q => q.eq('id', user.id).limit(1)),
         fetchRows('settings', q => q.eq('business_id', businessId)),
@@ -599,7 +606,16 @@
         fetchRows('suppliers', q => q.eq('business_id', businessId)),
         fetchRows('purchases', q => q.eq('business_id', businessId)),
         fetchRows('purchase_items', q => q.eq('business_id', businessId))
-      ]);
+      ];
+      /* Une table indisponible ne doit pas bloquer tout le tableau de bord.
+         On conserve alors ses données locales et on hydrate les autres tables. */
+      const settled = await Promise.allSettled(requests);
+      const loadErrors = [];
+      const results = settled.map(function (item, index) {
+        if (item.status === 'fulfilled') return item.value || [];
+        loadErrors.push({ table: tableNames[index], message: item.reason && item.reason.message ? item.reason.message : String(item.reason || 'Erreur') });
+        return Array.isArray(db[tableNames[index]]) ? db[tableNames[index]] : [];
+      });
 
       const businesses = results[0].map(mapBusiness);
       const profiles = results[1].map(mapProfile);
@@ -657,7 +673,7 @@
       db.suppliers = results[20];
       db.purchases = results[21];
       db.purchase_items = results[22];
-      db.meta.reference_loaded = true;
+      if (!loadErrors.length) db.meta.reference_loaded = true;
       db.meta.demo = false;
       db.meta.remote = true;
       db.meta.updated_at = new Date().toISOString();
