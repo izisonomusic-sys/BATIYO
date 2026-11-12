@@ -152,9 +152,12 @@
         if (!res.data.session || !res.data.user) {
           return { ok: false, error: 'La confirmation du téléphone est encore activée dans Supabase. Pour créer le compte sans SMS, désactivez « Confirm phone » dans Authentication → Providers → Phone.' };
         }
-        await B.DataRepository.hydrate();
-        const user = B.session.user();
-        if (!user) return { ok: false, error: 'Compte créé, mais le profil de l’entreprise n’a pas pu être chargé. Réessayez de vous connecter.' };
+        const identity = await B.DataRepository.bootstrapSession();
+        const user = identity && identity.user ? identity.user : B.session.user();
+        if (!user) return { ok: false, error: (identity && identity.error) || 'Compte créé, mais le profil de l’entreprise n’a pas pu être chargé. Réessayez de vous connecter.' };
+        B.DataRepository.hydrate().then(function (result) {
+          if (result && result.user && B.router) B.router.refresh();
+        }).catch(function (e) { B.bus.emit('sync:error', e); });
         return { ok: true, user: user, session: res.data.session };
       } catch (e) {
         return { ok: false, error: e.message || 'Impossible de créer le compte.' };
@@ -178,9 +181,14 @@
       try {
         const res = await B.DataRepository.remote.signIn(normalizedPhone, password);
         if (res.error) return { ok: false, error: res.error.message };
-        await B.DataRepository.hydrate();
-        const user = B.session.user();
-        if (!user) return { ok: false, error: 'Connexion réussie mais profil introuvable.' };
+        const identity = await B.DataRepository.bootstrapSession();
+        const user = identity && identity.user ? identity.user : B.session.user();
+        if (!user) return { ok: false, error: (identity && identity.error) || 'Connexion réussie mais profil introuvable.' };
+        /* Le tableau de bord ne doit pas attendre les 23 lectures métier.
+           Les données détaillées se chargent après l'ouverture de session. */
+        B.DataRepository.hydrate().then(function (result) {
+          if (result && result.user && B.router) B.router.refresh();
+        }).catch(function (e) { B.bus.emit('sync:error', e); });
         return { ok: true, user: user };
       } catch (e) {
         return { ok: false, error: e.message || 'Connexion impossible.' };
