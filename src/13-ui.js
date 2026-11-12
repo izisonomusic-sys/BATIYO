@@ -161,18 +161,24 @@
   function confirm(opts) {
     const o = opts || {};
     return new Promise(function (resolve) {
+      let settled = false;
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      }
       const m = modal({
         title: o.title || 'Confirmer',
         body: '<p style="color:#334155">' + h(o.message || '') + '</p>' +
           (o.detail ? '<div class="banner banner-' + (o.detailTone || 'warn') + ' mt-12">' + h(o.detail) + '</div>' : ''),
         footer: true,
-        onClose: function () { resolve(false); }
+        onClose: function () { finish(false); }
       });
       const yes = B.el('<button class="btn ' + (o.tone === 'danger' ? 'btn-danger' : 'btn-primary') + '">' + h(o.confirmLabel || 'Confirmer') + '</button>');
       const no = B.el('<button class="btn btn-ghost">' + h(o.cancelLabel || 'Annuler') + '</button>');
       yes.style.flex = no.style.flex = '1';
-      yes.addEventListener('click', function () { m.close(); resolve(true); });
-      no.addEventListener('click', function () { m.close(); resolve(false); });
+      yes.addEventListener('click', function () { finish(true); m.close(); });
+      no.addEventListener('click', function () { finish(false); m.close(); });
       m.foot.appendChild(no); m.foot.appendChild(yes);
     });
   }
