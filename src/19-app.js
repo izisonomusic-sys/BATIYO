@@ -330,6 +330,7 @@
       '</aside>' +
       '<main class="admin-main"><header class="admin-topbar"><div><span class="admin-eyebrow">ESPACE DE PILOTAGE</span><h1>' + h(title) + '</h1></div>' +
       '<div class="admin-top-actions"><span class="admin-role-pill">' + ui().icon('shieldCheck', 15) + ' Administrateur</span>' +
+      '<button type="button" class="admin-logout admin-logout-top" data-admin-logout-top aria-label="Déconnecter le compte administrateur">' + ui().icon('logOut', 17) + ' Déconnexion</button>' +
       '<div class="admin-avatar">' + h(B.initials((B.session.user() || {}).name || 'Admin')) + '</div></div></header>' +
       '<section class="admin-content" id="view"></section>' +
       '<footer class="admin-footer">BATIYO · Console d’administration <span>Plateforme sécurisée</span></footer></main>';
@@ -341,10 +342,16 @@
         if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
-    B.$('[data-admin-logout]', shell).addEventListener('click', function () {
+    function requestAdminLogout() {
       ui().confirm({ title: 'Se déconnecter ?', message: 'Vous allez quitter la console d’administration.', confirmLabel: 'Se déconnecter' })
-        .then(function (ok) { if (ok) { B.authService.logout(); B.router.go('/login'); } });
-    });
+        .then(async function (ok) {
+          if (!ok) return;
+          await B.authService.logout();
+          B.router.go('/login');
+        });
+    }
+    B.$('[data-admin-logout]', shell).addEventListener('click', requestAdminLogout);
+    B.$('[data-admin-logout-top]', shell).addEventListener('click', requestAdminLogout);
     return shell;
   }
 
