@@ -536,6 +536,39 @@
       return { ok: true };
     }
 
+    /* Charge uniquement l'identité et l'entreprise pour ouvrir la session.
+       Les tables métier sont récupérées ensuite par hydrate() en arrière-plan. */
+    async function bootstrapIdentity(user) {
+      if (!ready || !user) return { ok: false, skipped: true };
+      const profileRows = await fetchRows('profiles', q => q.eq('id', user.id).limit(1));
+      const profiles = profileRows.map(mapProfile);
+      const profile = profiles[0] || null;
+      const businessId = (user.user_metadata && user.user_metadata.business_id) || (profile && profile.business_id) || null;
+      if (!businessId) return { ok: false, error: 'Entreprise introuvable pour cet utilisateur.' };
+      const businessRows = await fetchRows('businesses', q => q.eq('id', businessId).limit(1));
+      const businesses = businessRows.map(mapBusiness);
+      const appRole = user.app_metadata && user.app_metadata.role;
+      const users = [{
+        id: user.id,
+        identifier: user.phone || '',
+        phone: user.phone || (user.user_metadata && user.user_metadata.phone) || '',
+        email: user.email || '',
+        name: profile && profile.full_name ? profile.full_name : (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || '',
+        profession_id: profile ? profile.profession_id : null,
+        business_id: businessId,
+        role: appRole === 'admin' ? 'admin' : (profile ? profile.role : 'proprietaire'),
+        onboarding_done: profile ? profile.onboarding_done !== false : false,
+        avatar: profile ? profile.avatar_url : null
+      }];
+      const db = local().load();
+      db.users = users;
+      db.profiles = profiles;
+      db.businesses = businesses;
+      db.meta.remote = true;
+      local().importDB(db);
+      return { ok: true, user: users[0], business: businesses[0] || null };
+    }
+
     async function hydrate(businessId) {
       if (!ready || !businessId) return { ok: false, skipped: true };
       const db = local().load();
@@ -671,6 +704,7 @@
       uploadDataUrl: uploadDataUrlRemote,
       onAuthStateChange: function (fn) { return ensure().auth.onAuthStateChange(fn); },
       hydrate: hydrate,
+      bootstrapIdentity: bootstrapIdentity,
       syncBusiness: syncBusiness
     };
   }
@@ -679,6 +713,7 @@
     local: null,
     remote: null,
     _syncTimer: null,
+    _hydratePromise: null,
     init: function () {
       this.local = LocalRepository();
       this.remote = SupabaseRepository(B.SUPABASE_CONFIG);
@@ -709,20 +744,32 @@
       if (!this.remote || !this.remote.ready) return { publicUrl: dataUrl, path: path };
       return this.remote.uploadDataUrl(bucket, path, dataUrl);
     },
-    hydrate: async function () {
-      if (!this.remote || !this.remote.ready) return { ok: false, skipped: true };
+    bootstrapSession: async function () {
+      if (!this.remote || !this.remote.ready) return { ok: false, error: 'Supabase n’est pas configuré.' };
       const session = await this.remote.getSession();
       const user = session && session.data ? session.data.session && session.data.session.user : null;
       if (!user) return { ok: false, skipped: true };
-      const meta = user.user_metadata || {};
-      let businessId = meta.business_id || (B.session.profile() && B.session.profile().business_id) || null;
-      if (!businessId) businessId = await this.remote.resolveBusinessId(user.id);
-      if (!businessId) return { ok: false, error: 'Entreprise introuvable pour cet utilisateur.' };
-      const result = await this.remote.hydrate(businessId);
-      if (result && result.user) {
-        B.session.login(result.user, true);
-      }
-      return result;
+      const identity = await this.remote.bootstrapIdentity(user);
+      if (identity && identity.user) B.session.login(identity.user, true);
+      return identity;
+    },
+    hydrate: function () {
+      if (!this.remote || !this.remote.ready) return Promise.resolve({ ok: false, skipped: true });
+      if (this._hydratePromise) return this._hydratePromise;
+      const self = this;
+      this._hydratePromise = (async function () {
+        const session = await self.remote.getSession();
+        const user = session && session.data ? session.data.session && session.data.session.user : null;
+        if (!user) return { ok: false, skipped: true };
+        const meta = user.user_metadata || {};
+        let businessId = meta.business_id || (B.session.profile() && B.session.profile().business_id) || null;
+        if (!businessId) businessId = await self.remote.resolveBusinessId(user.id);
+        if (!businessId) return { ok: false, error: 'Entreprise introuvable pour cet utilisateur.' };
+        const result = await self.remote.hydrate(businessId);
+        if (result && result.user) B.session.login(result.user, true);
+        return result;
+      })().finally(function () { self._hydratePromise = null; });
+      return this._hydratePromise;
     },
     markLocalSynced: function () { this.local.markSynced(); }
   };
