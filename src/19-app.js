@@ -160,7 +160,7 @@
         location.replace(isAdmin ? '#/admin' : '#/dashboard');
         return;
       }
-      if (loggedIn && isAdmin && path === '/dashboard') {
+      if (loggedIn && isAdmin && path !== '/admin' && !route.public) {
         location.replace('#/admin');
         return;
       }
@@ -321,10 +321,10 @@
         '<div class="admin-nav-label">PLATEFORME</div>' +
         '<a class="admin-nav-link active" href="#/admin">' + ui().icon('layoutDashboard', 18) + '<span>Vue générale</span></a>' +
         '<div class="admin-nav-label">GESTION</div>' +
-        '<a class="admin-nav-link" href="#/admin#users">' + ui().icon('users', 18) + '<span>Utilisateurs</span></a>' +
-        '<a class="admin-nav-link" href="#/admin#subscriptions">' + ui().icon('creditCard', 18) + '<span>Abonnements</span></a>' +
-        '<a class="admin-nav-link" href="#/admin#quotes">' + ui().icon('fileText', 18) + '<span>Activité commerciale</span></a>' +
-        '<a class="admin-nav-link" href="#/admin#payments">' + ui().icon('wallet', 18) + '<span>Paiements</span></a>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="users">' + ui().icon('users', 18) + '<span>Utilisateurs</span></a>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="subscriptions">' + ui().icon('creditCard', 18) + '<span>Abonnements</span></a>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="quotes">' + ui().icon('fileText', 18) + '<span>Activité commerciale</span></a>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="payments">' + ui().icon('wallet', 18) + '<span>Paiements</span></a>' +
         '<div class="admin-sidebar-bottom"><span class="admin-secure">' + ui().icon('shieldCheck', 15) + ' Accès sécurisé</span>' +
         '<button class="admin-logout" data-admin-logout>' + ui().icon('logOut', 17) + ' Déconnexion</button></div>' +
       '</aside>' +
@@ -334,6 +334,13 @@
       '<section class="admin-content" id="view"></section>' +
       '<footer class="admin-footer">BATIYO · Console d’administration <span>Plateforme sécurisée</span></footer></main>';
     B.$('#view', shell).appendChild(view);
+    B.$('.admin-nav-link[data-admin-target]', shell).forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        const target = B.$('#' + link.dataset.adminTarget, shell);
+        if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
     B.$('[data-admin-logout]', shell).addEventListener('click', function () {
       ui().confirm({ title: 'Se déconnecter ?', message: 'Vous allez quitter la console d’administration.', confirmLabel: 'Se déconnecter' })
         .then(function (ok) { if (ok) { B.authService.logout(); B.router.go('/login'); } });
