@@ -334,7 +334,7 @@
       '<section class="admin-content" id="view"></section>' +
       '<footer class="admin-footer">BATIYO · Console d’administration <span>Plateforme sécurisée</span></footer></main>';
     B.$('#view', shell).appendChild(view);
-    B.$('.admin-nav-link[data-admin-target]', shell).forEach(function (link) {
+    B.$$('.admin-nav-link[data-admin-target]', shell).forEach(function (link) {
       link.addEventListener('click', function (event) {
         event.preventDefault();
         const target = B.$('#' + link.dataset.adminTarget, shell);
