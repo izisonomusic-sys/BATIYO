@@ -590,7 +590,7 @@
         name: profiles[0] && profiles[0].full_name ? profiles[0].full_name : (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || '',
         profession_id: profiles[0] ? profiles[0].profession_id : null,
         business_id: businessId,
-        role: profiles[0] ? profiles[0].role : 'proprietaire',
+        role: user.app_metadata && user.app_metadata.role === 'admin' ? 'admin' : (profiles[0] ? profiles[0].role : 'proprietaire'),
         onboarding_done: profiles[0] ? profiles[0].onboarding_done !== false : false,
         avatar: profiles[0] ? profiles[0].avatar_url : null
       }];
