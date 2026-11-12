@@ -58,15 +58,30 @@
           throw new Error('Accès réservé au compte administrateur. Déconnectez-vous puis reconnectez-vous pour actualiser vos droits.');
         }
         const db = remote.client;
-        const results = await Promise.all([
+        const requestNames = ['utilisateurs','entreprises','abonnements','devis','paiements','factures'];
+        const requests = [
           db.from('profiles').select('id,full_name,phone,email,role,business_id,created_at').order('created_at', { ascending: false }),
           db.from('businesses').select('id,name,phone,created_at').order('created_at', { ascending: false }),
           db.from('business_subscriptions').select('id,business_id,plan_id,status,billing_period_months,amount_fcfa,provider,payment_reference,provider_reference,created_at,starts_at,ends_at').order('created_at', { ascending: false }),
           db.from('quotes').select('id,business_id,number,status,total,date,created_at').order('created_at', { ascending: false }),
           db.from('payments').select('id,business_id,invoice_id,amount,date,method,reference,created_at').order('created_at', { ascending: false }),
           db.from('invoices').select('id', { count: 'exact', head: true })
-        ]);
-        results.forEach(function (r) { if (r.error) throw r.error; });
+        ];
+        /* Une table admin en erreur ne doit pas masquer les autres indicateurs. */
+        const settled = await Promise.allSettled(requests);
+        const queryErrors = [];
+        const results = settled.map(function (item, index) {
+          if (item.status === 'rejected') {
+            queryErrors.push(requestNames[index]);
+            return { data: [], count: 0 };
+          }
+          const response = item.value || {};
+          if (response.error) {
+            queryErrors.push(requestNames[index]);
+            return { data: [], count: 0 };
+          }
+          return response;
+        });
         const profiles = results[0].data || [];
         const businesses = results[1].data || [];
         const subs = results[2].data || [];
@@ -93,6 +108,9 @@
         const recentSubs = subs.filter(function (s) { return withinDays(s.created_at, 30); }).length;
 
         state.hidden = true;
+        if (queryErrors.length) {
+          content.appendChild(B.el('<div class="card card-pad banner-warn small">Certaines données ne sont pas disponibles pour le moment (' + h(queryErrors.join(', ')) + '). Les autres indicateurs restent affichés. Utilisez « Actualiser » pour réessayer.</div>'));
+        }
         content.appendChild(B.el('<div class="admin-stat-grid">' +
           stat('Utilisateurs inscrits', profiles.length, registeredToday + ' aujourd’hui · ' + registered7d + ' sur 7 jours · ' + registered30d + ' sur 30 jours') +
           stat('Entreprises', businesses.length, 'Espaces professionnels enregistrés') +
