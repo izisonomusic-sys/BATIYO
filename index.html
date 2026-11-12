@@ -106,9 +106,16 @@
       setTimeout(check, 100);
     }
     window.addEventListener('error', function (event) {
-      if (event && event.target && event.target !== window) return;
+      /* Les erreurs de chargement des scripts/styles doivent aussi être visibles :
+         elles étaient auparavant ignorées et produisaient seulement un écran générique. */
+      if (event && event.target && event.target !== window) {
+        var resource = event.target;
+        var source = resource.src || resource.href || 'ressource inconnue';
+        showError('Impossible de charger une ressource : ' + source);
+        return;
+      }
       var err = event && event.error; var detail = (event && event.message) || (err && err.message) || 'Erreur JavaScript inconnue'; var where = event && event.filename ? ' | fichier: ' + event.filename.split('/').pop() + ' | ligne: ' + event.lineno + ' | colonne: ' + event.colno : ''; var stack = err && err.stack ? ' | pile: ' + String(err.stack).slice(0, 900) : ''; showError('Diagnostic : ' + detail + where + stack);
-    });
+    }, true);
     window.addEventListener('unhandledrejection', function (event) {
       var reason = event && event.reason;
       var detail = reason && reason.message ? reason.message : String(reason || '');
