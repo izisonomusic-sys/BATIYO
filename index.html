@@ -72,36 +72,47 @@
 <script src="src/20-screens-admin.js"></script>
 <script src="src/19-app.js"></script>
 <script>
-  /* Ne jamais retirer l'écran de démarrage si le routeur n'existe pas :
-     cela transformait une erreur JavaScript en page blanche silencieuse. */
+  /* Le démarrage ne doit jamais transformer une exception JavaScript en page blanche. */
   (function () {
     var attempts = 0;
     function showError(message) {
-      var boot = document.getElementById('boot');
-      if (!boot) return;
-      boot.innerHTML = '<div class="b" style="max-width:340px;padding:24px"><strong style="color:#0F172A">BATIYO n’a pas pu démarrer</strong><div style="margin-top:10px">' +
-        (message || 'Le chargement de l’application a rencontré un problème.') +
-        '</div><button type="button" onclick="window.location.reload()" style="margin-top:18px;padding:11px 18px;border:0;border-radius:10px;background:#0F766E;color:#fff;font-weight:700">Réessayer</button></div>';
+      var host = document.getElementById('boot') || document.getElementById('app');
+      if (!host) return;
+      host.innerHTML = '<div class="b" style="max-width:360px;padding:24px;margin:auto;text-align:center;color:#64748B;font-size:14px">' +
+        '<strong style="color:#0F172A">BATIYO n’a pas pu démarrer</strong>' +
+        '<div data-startup-error style="margin-top:10px"></div>' +
+        '<button type="button" onclick="window.location.reload()" style="margin-top:18px;padding:11px 18px;border:0;border-radius:10px;background:#0F766E;color:#fff;font-weight:700">Réessayer</button></div>';
+      var detail = host.querySelector('[data-startup-error]');
+      if (detail) detail.textContent = message || 'Une erreur a empêché le chargement. Rechargez la page pour réessayer.';
+      if (host.id === 'app') {
+        host.style.minHeight = '100vh';
+        host.style.display = 'grid';
+        host.style.placeItems = 'center';
+        host.style.background = '#F8FAFC';
+      }
     }
     function check() {
-      if (window.BATIYO && window.BATIYO.router) {
+      var app = document.getElementById('app');
+      if (window.BATIYO && window.BATIYO.router && app && app.firstChild) {
         var boot = document.getElementById('boot');
         if (boot) boot.remove();
         return;
       }
       attempts += 1;
       if (attempts >= 120) {
-        showError('Le démarrage prend trop de temps. Vérifiez votre connexion Internet puis appuyez sur Réessayer.');
+        showError('Le démarrage prend trop de temps ou aucune page n’a pu être affichée. Vérifiez Internet puis réessayez.');
         return;
       }
       setTimeout(check, 100);
     }
     window.addEventListener('error', function (event) {
       if (event && event.target && event.target !== window) return;
-      showError('Une erreur JavaScript a empêché le démarrage. Rechargez la page pour réessayer.');
+      showError('Une erreur JavaScript a interrompu BATIYO. Rechargez la page ; si le problème continue, transmettez ce message au support.');
     });
-    window.addEventListener('unhandledrejection', function () {
-      /* Une erreur distante ne doit pas masquer l'interface déjà montée. */
+    window.addEventListener('unhandledrejection', function (event) {
+      var reason = event && event.reason;
+      var detail = reason && reason.message ? reason.message : String(reason || '');
+      showError(detail ? 'Erreur de démarrage : ' + detail : 'Une opération de démarrage a échoué. Rechargez la page pour réessayer.');
     });
     check();
   })();
