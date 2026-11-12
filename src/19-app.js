@@ -534,35 +534,46 @@
     B.bus.on('session:login', function () { B.router.refresh(); });
     window.addEventListener('hashchange', function () { router.render(); });
 
-    /* Restaurer la session Supabase et hydrater le cache local si possible. */
+    /* Afficher immédiatement l'interface avec la session et le cache locaux.
+       La restauration/hydratation distante ne doit jamais bloquer le premier rendu. */
+    router.render();
+    try { if (B.session.isLoggedIn()) B.budgetWatch.scanAll(); } catch (e) { /* non bloquant */ }
+
     if (B.DataRepository.remote && B.DataRepository.remote.ready) {
-      try { await B.DataRepository.hydrate(); } catch (e) { B.bus.emit('sync:error', e); }
+      B.DataRepository.remote.onAuthStateChange(function (event) {
+        if (event === 'SIGNED_OUT') { B.session.logout(); }
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setTimeout(function () {
+            B.DataRepository.hydrate().then(function (result) {
+              if (result && result.user) B.router.refresh();
+            }).catch(function (e) { B.bus.emit('sync:error', e); });
+          }, 0);
+        }
+      });
+
+      /* Chargement distant en arrière-plan : l'écran reste utilisable même si
+         Supabase répond lentement ou si le réseau est momentanément indisponible. */
+      B.DataRepository.hydrate().then(function (result) {
+        if (result && result.user) {
+          B.router.refresh();
+          try { B.budgetWatch.scanAll(); } catch (e) { /* non bloquant */ }
+        }
+      }).catch(function (e) { B.bus.emit('sync:error', e); });
+
       if (new URLSearchParams(location.search).get('auth') === 'google' && B.session.isLoggedIn()) {
-        try {
-          const authUser = await B.DataRepository.remote.getUser();
+        B.DataRepository.remote.getUser().then(function (authUser) {
           const provider = authUser && authUser.data && authUser.data.user && authUser.data.user.app_metadata
             ? authUser.data.user.app_metadata.provider : null;
           const localUser = B.session.user();
           const destination = provider === 'google' && !(localUser && localUser.profession_id) ? '/onboarding' : '/dashboard';
           history.replaceState(null, '', location.pathname + location.hash);
           location.hash = destination;
-        } catch (e) {
-          location.hash = '/dashboard';
-        }
+        }).catch(function () { location.hash = '/dashboard'; });
       }
-      B.DataRepository.remote.onAuthStateChange(function (event) {
-        if (event === 'SIGNED_OUT') { B.session.logout(); }
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          setTimeout(function () { B.DataRepository.hydrate().catch(function (e) { B.bus.emit('sync:error', e); }); }, 0);
-        }
-      });
     }
 
-    router.render();
-    try { if (B.session.isLoggedIn()) B.budgetWatch.scanAll(); } catch (e) { /* non bloquant */ }
     if (!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)) setTimeout(pwa.showIosHint, 2500);
   }
-
   B.router = router;
   B.boot = boot;
 
