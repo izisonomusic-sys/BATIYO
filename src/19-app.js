@@ -149,14 +149,25 @@
         location.hash = '/login';
         return;
       }
+      const currentUser = B.session.user() || {};
+      const isAdmin = currentUser.role === 'admin';
+      if (path === '/admin' && !isAdmin) {
+        ui().toast('Accès réservé à l’administration BATIYO.', 'error');
+        location.replace('#/dashboard');
+        return;
+      }
       if (loggedIn && (path === '/login' || path === '/register') && !query.stay) {
-        location.hash = '/dashboard';
+        location.replace(isAdmin ? '#/admin' : '#/dashboard');
+        return;
+      }
+      if (loggedIn && isAdmin && path !== '/admin' && !route.public) {
+        location.replace('#/admin');
         return;
       }
       /* Un utilisateur connecté ne doit jamais retomber sur la landing page.
          Remplacer l'entrée courante évite une boucle avec le bouton Retour. */
       if (loggedIn && path === '/') {
-        location.replace('#/dashboard');
+        location.replace(isAdmin ? '#/admin' : '#/dashboard');
         return;
       }
 
@@ -178,7 +189,7 @@
         document.title = route.title ? route.title + ' — BATIYO' : 'BATIYO — Devis et gestion pour artisans';
       } else {
         app.innerHTML = '';
-        app.appendChild(shellFor(view, route.title || 'BATIYO', query));
+        app.appendChild(path === '/admin' ? adminShellFor(view, route.title || 'Administration BATIYO') : shellFor(view, route.title || 'BATIYO', query));
         document.title = (route.title || 'BATIYO') + ' — BATIYO';
       }
       /* Ouverture de l'élément demandé par l'URL (client=, project=) */
@@ -297,6 +308,43 @@
     main.appendChild(bottom);
     main.appendChild(fab);
     ui().bindMoneyInputs(shell);
+    return shell;
+  }
+
+
+  /* ---------------------- Espace administrateur dédié -------------------- */
+  function adminShellFor(view, title) {
+    const shell = B.el('<div class="admin-shell"></div>');
+    shell.innerHTML =
+      '<aside class="admin-sidebar">' +
+        '<a class="admin-brand" href="#/admin">' + B.screens.logoMark() + '<span><strong>BATIYO</strong><small>CONTROL CENTER</small></span></a>' +
+        '<div class="admin-nav-label">PLATEFORME</div>' +
+        '<a class="admin-nav-link active" href="#/admin">' + ui().icon('layoutDashboard', 18) + '<span>Vue générale</span></a>' +
+        '<div class="admin-nav-label">GESTION</div>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="users">' + ui().icon('users', 18) + '<span>Utilisateurs</span></a>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="subscriptions">' + ui().icon('creditCard', 18) + '<span>Abonnements</span></a>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="quotes">' + ui().icon('fileText', 18) + '<span>Activité commerciale</span></a>' +
+        '<a class="admin-nav-link" href="#/admin" data-admin-target="payments">' + ui().icon('wallet', 18) + '<span>Paiements</span></a>' +
+        '<div class="admin-sidebar-bottom"><span class="admin-secure">' + ui().icon('shieldCheck', 15) + ' Accès sécurisé</span>' +
+        '<button class="admin-logout" data-admin-logout>' + ui().icon('logOut', 17) + ' Déconnexion</button></div>' +
+      '</aside>' +
+      '<main class="admin-main"><header class="admin-topbar"><div><span class="admin-eyebrow">ESPACE DE PILOTAGE</span><h1>' + h(title) + '</h1></div>' +
+      '<div class="admin-top-actions"><span class="admin-role-pill">' + ui().icon('shieldCheck', 15) + ' Administrateur</span>' +
+      '<div class="admin-avatar">' + h(B.initials((B.session.user() || {}).name || 'Admin')) + '</div></div></header>' +
+      '<section class="admin-content" id="view"></section>' +
+      '<footer class="admin-footer">BATIYO · Console d’administration <span>Plateforme sécurisée</span></footer></main>';
+    B.$('#view', shell).appendChild(view);
+    B.$('.admin-nav-link[data-admin-target]', shell).forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        const target = B.$('#' + link.dataset.adminTarget, shell);
+        if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    B.$('[data-admin-logout]', shell).addEventListener('click', function () {
+      ui().confirm({ title: 'Se déconnecter ?', message: 'Vous allez quitter la console d’administration.', confirmLabel: 'Se déconnecter' })
+        .then(function (ok) { if (ok) { B.authService.logout(); B.router.go('/login'); } });
+    });
     return shell;
   }
 
