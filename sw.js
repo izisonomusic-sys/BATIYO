@@ -57,7 +57,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   const sameOrigin = url.origin === self.location.origin;
-  const supabaseSdk = /cdn\.jsdelivr\.net$/.test(url.hostname) && /@supabase\/supabase-js/.test(url.pathname);
+  const supabaseSdk = /(cdn\.jsdelivr\.net|unpkg\.com)$/.test(url.hostname) && /@supabase\/supabase-js/.test(url.pathname);
   if (!sameOrigin && !supabaseSdk) return;
 
   // Réseau d'abord : les corrections publiées sont servies dès la prochaine requête.
