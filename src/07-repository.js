@@ -566,7 +566,7 @@
       db.businesses = businesses;
       db.meta.remote = true;
       local().importDB(db);
-      return { ok: loadErrors.length === 0, partial: loadErrors.length > 0, errors: loadErrors, user: users[0], business: businesses[0] || null };
+      return { ok: true, user: users[0], business: businesses[0] || null };
     }
 
     async function hydrate(businessId) {
@@ -678,7 +678,7 @@
       db.meta.remote = true;
       db.meta.updated_at = new Date().toISOString();
       local().importDB(db);
-      return { ok: true, user: users[0], business: businesses[0] || null };
+      return { ok: loadErrors.length === 0, partial: loadErrors.length > 0, errors: loadErrors, user: users[0], business: businesses[0] || null };
     }
 
     return {
