@@ -1,7 +1,7 @@
 /* BATIYO — Service worker PWA
    Version réseau prioritaire : récupère les dernières modifications dès qu'Internet est disponible.
    Le cache reste disponible comme secours hors connexion. */
-const CACHE = 'batiyo-v27';
+const CACHE = 'batiyo-v28';
 const ASSETS = [
   './',
   './index.html',
