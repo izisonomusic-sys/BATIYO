@@ -1,7 +1,7 @@
 /* BATIYO — Service worker PWA
    Version réseau prioritaire : récupère les dernières modifications dès qu'Internet est disponible.
    Le cache reste disponible comme secours hors connexion. */
-const CACHE = 'batiyo-v28';
+const CACHE = 'batiyo-v29';
 const ASSETS = [
   './',
   './index.html',
@@ -73,8 +73,19 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => caches.match(request).then((cached) => {
         if (cached) return cached;
-        if (sameOrigin && (request.mode === 'navigate' || url.pathname.endsWith('/'))) {
-          return caches.match('./index.html');
+        /* Les fichiers JS/CSS sont pré-mis en cache sans query string.
+           Une URL versionnée (?v=...) doit pouvoir retrouver cette copie. */
+        if (sameOrigin) {
+          const cleanUrl = new URL(url.href);
+          cleanUrl.search = '';
+          cleanUrl.hash = '';
+          return caches.match(cleanUrl.href).then((cleanCached) => {
+            if (cleanCached) return cleanCached;
+            if (request.mode === 'navigate' || url.pathname.endsWith('/')) {
+              return caches.match('./index.html');
+            }
+            return Response.error();
+          });
         }
         return Response.error();
       }))
