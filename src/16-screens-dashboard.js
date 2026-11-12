@@ -24,7 +24,7 @@
     /* En-tête + actions rapides (#132) */
     wrap.appendChild(B.el(
       '<div class="row-between wrap">' +
-        '<div><h2>' + h(hello) + ', ' + h((B.session.user() ? B.session.user().name.split(' ')[0] : '')) + '</h2>' +
+        '<div><h2>' + h(hello) + ', ' + h((B.session.user() && B.session.user().name ? String(B.session.user().name).split(' ')[0] : '')) + '</h2>' +
         '<div class="small muted">' + h(business ? business.name : '') + ' · ' + h(prof.name) +
         ' · ' + B.dateLong(B.today()) + '</div></div>' +
         '<div class="row" style="gap:8px">' + netPill() + '</div>' +
