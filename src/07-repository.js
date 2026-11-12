@@ -715,7 +715,7 @@
       signInWithOAuth: async function (provider, options) {
         return ensure().auth.signInWithOAuth({ provider: provider, options: options || {} });
       },
-      signOut: async function () { return ensure().auth.signOut(); },
+      signOut: async function () { return ensure().auth.signOut({ scope: 'local' }); },
       resetPassword: async function (email, redirectTo) {
         return ensure().auth.resetPasswordForEmail(email, { redirectTo: redirectTo || location.origin + location.pathname + '#/login' });
       },
