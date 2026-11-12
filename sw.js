@@ -1,7 +1,7 @@
-/* BATIYO — Service worker (PWA, #17x)
-   Met en cache les fichiers de l'application pour que l'interface reste
-   disponible hors connexion. Les données, elles, sont déjà locales. */
-const CACHE = 'batiyo-v24';
+/* BATIYO — Service worker PWA
+   Version réseau prioritaire : récupère les dernières modifications dès qu'Internet est disponible.
+   Le cache reste disponible comme secours hors connexion. */
+const CACHE = 'batiyo-v25';
 const ASSETS = [
   './',
   './index.html',
@@ -29,33 +29,54 @@ const ASSETS = [
   './src/19-app.js'
 ];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()).catch(() => self.skipWaiting()));
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => Promise.all(ASSETS.map((asset) =>
+        fetch(new Request(asset, { cache: 'reload' }))
+          .then((response) => {
+            if (response && response.ok) return cache.put(asset, response);
+          })
+          .catch(() => {})
+      )))
+      .then(() => self.skipWaiting())
+  );
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', (e) => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  const sameOrigin = url.origin === location.origin;
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+  const sameOrigin = url.origin === self.location.origin;
   const supabaseSdk = /cdn\.jsdelivr\.net$/.test(url.hostname) && /@supabase\/supabase-js/.test(url.pathname);
   if (!sameOrigin && !supabaseSdk) return;
-  e.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req).then((res) => {
-        if (res && (res.status === 200 || res.type === 'opaque')) {
-          caches.open(CACHE).then((c) => c.put(req, res.clone())).catch(() => {});
+
+  // Réseau d'abord : les corrections publiées sont servies dès la prochaine requête.
+  // Si le réseau est indisponible, on utilise le cache pour garder l'application accessible.
+  event.respondWith(
+    fetch(request, { cache: 'no-cache' })
+      .then((response) => {
+        if (response && (response.ok || response.type === 'opaque')) {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
         }
-        return res;
-      }).catch(() => sameOrigin ? caches.match('./index.html') : Response.error());
-    })
+        return response;
+      })
+      .catch(() => caches.match(request).then((cached) => {
+        if (cached) return cached;
+        if (sameOrigin && (request.mode === 'navigate' || url.pathname.endsWith('/'))) {
+          return caches.match('./index.html');
+        }
+        return Response.error();
+      }))
   );
 });
