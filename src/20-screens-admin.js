@@ -33,6 +33,8 @@
     }
     function section(title, rows, empty, render) {
       const card = B.el('<section class="card card-pad stack-sm admin-section-card"></section>');
+      const sectionIds = { 'Derniers utilisateurs inscrits': 'users', 'Abonnements et paiements PayDunya': 'subscription-list', 'Derniers devis créés': 'quotes', 'Paiements de factures': 'payments' };
+      if (sectionIds[title]) card.id = sectionIds[title];
       card.appendChild(B.el('<div class="row-between"><h3>' + h(title) + '</h3><span class="badge">' + rows.length + '</span></div>'));
       if (!rows.length) card.appendChild(B.el('<p class="muted small">' + h(empty) + '</p>'));
       else {
@@ -103,7 +105,7 @@
           stat('Visiteurs du site', 'Non mesuré', 'Le suivi des visites n’est pas encore installé') +
           '</div>'));
 
-        const planCard = B.el('<section class="card card-pad stack-sm admin-section-card"><h3>Répartition des abonnements par formule</h3></section>');
+        const planCard = B.el('<section id="subscriptions" class="card card-pad stack-sm admin-section-card"><h3>Répartition des abonnements par formule</h3></section>');
         const planRows = Object.keys(planCounts).sort().map(function (name) {
           return '<div class="kv"><span class="k">' + h(name) + '</span><strong class="v">' + planCounts[name] + '</strong></div>';
         }).join('');
