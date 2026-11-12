@@ -18,8 +18,8 @@
   function admin() {
     const root = B.el('<div class="stack admin-page"></div>');
     root.innerHTML =
-      '<div class="row-between wrap"><div><h2>Administration BATIYO</h2>' +
-      '<p class="muted small">Vue globale des comptes, entreprises, abonnements et activité.</p></div>' +
+      '<div class="admin-welcome row-between wrap"><div><h2>Vue d’ensemble de la plateforme</h2>' +
+      '<p class="muted small">Suivez les indicateurs clés, les comptes et les opérations de BATIYO depuis votre console dédiée.</p></div>' +
       '<button class="btn btn-ghost" data-refresh>↻ Actualiser</button></div>' +
       '<div data-admin-state class="card card-pad">Chargement des données administrateur…</div>' +
       '<div data-admin-content></div>';
@@ -27,12 +27,12 @@
     const content = B.$('[data-admin-content]', root);
 
     function stat(label, value, hint) {
-      return '<div class="card card-pad"><div class="tiny muted">' + h(label) + '</div>' +
+      return '<div class="card card-pad admin-stat-card"><div class="tiny muted">' + h(label) + '</div>' +
         '<div class="stat-value" style="font-size:24px;font-weight:800;margin-top:8px">' + h(String(value)) + '</div>' +
         '<div class="tiny muted">' + h(hint) + '</div></div>';
     }
     function section(title, rows, empty, render) {
-      const card = B.el('<section class="card card-pad stack-sm"></section>');
+      const card = B.el('<section class="card card-pad stack-sm admin-section-card"></section>');
       card.appendChild(B.el('<div class="row-between"><h3>' + h(title) + '</h3><span class="badge">' + rows.length + '</span></div>'));
       if (!rows.length) card.appendChild(B.el('<p class="muted small">' + h(empty) + '</p>'));
       else {
@@ -91,7 +91,7 @@
         const recentSubs = subs.filter(function (s) { return withinDays(s.created_at, 30); }).length;
 
         state.hidden = true;
-        content.appendChild(B.el('<div class="grid grid-2 grid-3-md">' +
+        content.appendChild(B.el('<div class="admin-stat-grid">' +
           stat('Utilisateurs inscrits', profiles.length, registeredToday + ' aujourd’hui · ' + registered7d + ' sur 7 jours · ' + registered30d + ' sur 30 jours') +
           stat('Entreprises', businesses.length, 'Espaces professionnels enregistrés') +
           stat('Abonnements actifs', active.length, 'Statut confirmé : active') +
@@ -103,7 +103,7 @@
           stat('Visiteurs du site', 'Non mesuré', 'Le suivi des visites n’est pas encore installé') +
           '</div>'));
 
-        const planCard = B.el('<section class="card card-pad stack-sm"><h3>Répartition des abonnements par formule</h3></section>');
+        const planCard = B.el('<section class="card card-pad stack-sm admin-section-card"><h3>Répartition des abonnements par formule</h3></section>');
         const planRows = Object.keys(planCounts).sort().map(function (name) {
           return '<div class="kv"><span class="k">' + h(name) + '</span><strong class="v">' + planCounts[name] + '</strong></div>';
         }).join('');
