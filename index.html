@@ -51,6 +51,29 @@
 <div id="app" aria-live="polite"></div>
 
 <!-- Application modulaire : l'ordre de chargement est indiqué par le préfixe des fichiers -->
+<!-- Compatibilité navigateurs mobiles : certaines versions Android/WebView
+     ne proposent pas encore forEach sur NodeList/HTMLCollection ni allSettled. -->
+<script>
+(function () {
+  if (typeof NodeList !== 'undefined' && !NodeList.prototype.forEach) {
+    NodeList.prototype.forEach = Array.prototype.forEach;
+  }
+  if (typeof HTMLCollection !== 'undefined' && !HTMLCollection.prototype.forEach) {
+    HTMLCollection.prototype.forEach = Array.prototype.forEach;
+  }
+  if (typeof Promise !== 'undefined' && !Promise.allSettled) {
+    Promise.allSettled = function (items) {
+      return Promise.all(Array.prototype.slice.call(items).map(function (item) {
+        return Promise.resolve(item).then(
+          function (value) { return { status: 'fulfilled', value: value }; },
+          function (reason) { return { status: 'rejected', reason: reason }; }
+        );
+      }));
+    };
+  }
+})();
+</script>
+
 <script src="src/01-config.js"></script>
 <script src="src/02-professions.js"></script>
 <script src="src/03-utils.js"></script>
