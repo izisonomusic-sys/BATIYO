@@ -27,7 +27,7 @@
       <header class="lp-header" id="lpHeader">
         <div class="container">
           <div class="inner">
-            <a href="${returnPath}" class="lp-logo">${logoMark()} BATIYO</a>
+            <a href="#/" class="lp-logo">${logoMark()} BATIYO</a>
             <nav class="lp-nav" aria-label="Navigation principale">
               <a href="#fonctionnalites">Fonctionnalités</a>
               <a href="#metiers">Métiers</a>
