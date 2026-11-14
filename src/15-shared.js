@@ -437,26 +437,150 @@
   }
 
   /* --------------------------------- Partage ------------------------------ */
+  let html2canvasPromise = null;
+
+  function loadHtml2Canvas() {
+    if (window.html2canvas) return Promise.resolve(window.html2canvas);
+    if (html2canvasPromise) return html2canvasPromise;
+    html2canvasPromise = new Promise(function (resolve, reject) {
+      const urls = [
+        'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+        'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js'
+      ];
+      function loadAt(index) {
+        if (window.html2canvas) return resolve(window.html2canvas);
+        if (index >= urls.length) return reject(new Error('Le moteur de création d’image est indisponible.'));
+        const script = document.createElement('script');
+        script.src = urls[index];
+        script.async = true;
+        script.onload = function () {
+          if (window.html2canvas) resolve(window.html2canvas);
+          else loadAt(index + 1);
+        };
+        script.onerror = function () { script.remove(); loadAt(index + 1); };
+        document.head.appendChild(script);
+      }
+      loadAt(0);
+    }).catch(function (error) {
+      html2canvasPromise = null;
+      throw error;
+    });
+    return html2canvasPromise;
+  }
+
+  async function makeDocumentShareImage(entity, doc) {
+    const render = await loadHtml2Canvas();
+    const html = entity === 'quote' ? B.pdf.quoteHTML(doc, { actions: false }) : B.pdf.invoiceHTML(doc, { actions: false });
+    const frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:900px;height:1400px;border:0;visibility:hidden;';
+    document.body.appendChild(frame);
+    try {
+      await new Promise(function (resolve, reject) {
+        frame.onload = resolve;
+        frame.onerror = function () { reject(new Error('Impossible de préparer le document.')); };
+        frame.srcdoc = html;
+      });
+      const docWindow = frame.contentWindow;
+      const sheet = frame.contentDocument && frame.contentDocument.querySelector('.sheet');
+      if (!sheet) throw new Error('Le contenu du document est introuvable.');
+      if (docWindow.document.fonts && docWindow.document.fonts.ready) {
+        await Promise.race([docWindow.document.fonts.ready, new Promise(function (resolve) { setTimeout(resolve, 1800); })]);
+      }
+      const images = Array.prototype.slice.call(sheet.querySelectorAll('img'));
+      await Promise.all(images.map(function (img) {
+        if (img.complete) return Promise.resolve();
+        return new Promise(function (resolve) {
+          img.onload = resolve;
+          img.onerror = resolve;
+          setTimeout(resolve, 2500);
+        });
+      }));
+      const canvas = await render(sheet, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        windowWidth: 900,
+        width: sheet.scrollWidth,
+        height: sheet.scrollHeight,
+        scrollX: 0,
+        scrollY: 0
+      });
+      const blob = await new Promise(function (resolve, reject) {
+        canvas.toBlob(function (value) {
+          if (value) resolve(value);
+          else reject(new Error('La création de l’image a échoué.'));
+        }, 'image/png');
+      });
+      const prefix = entity === 'quote' ? 'Devis-' : 'Facture-';
+      const filename = 'BATIYO-' + prefix + String(doc.number || 'document').replace(/[^a-z0-9_-]/gi, '-') + '.png';
+      return new File([blob], filename, { type: 'image/png' });
+    } finally {
+      frame.remove();
+    }
+  }
+
   async function shareDialog(entity, doc) {
     if (B.entitlementService && !(await B.entitlementService.requireDocumentExport(entity, doc))) return;
     const msg = B.pdf.shareMessage(entity, doc);
-    const client = B.clientService.get(doc.client_id);
     const body = B.el('<div class="stack"></div>');
     body.innerHTML =
       '<div class="field"><label>Message préparé</label><textarea class="textarea" data-msg rows="5">' + h(msg) + '</textarea>' +
-      '<div class="hint">Vous pouvez modifier le message avant de l’envoyer.</div></div>' +
-      '<div class="banner banner-info">' + ui().icon('info', 18) + '<span>BATIYO prépare le message et ouvre WhatsApp si l’application est disponible sur cet appareil. Le PDF doit être joint manuellement depuis votre téléphone.</span></div>';
+      '<div class="hint">Vous pouvez modifier le message avant de le partager.</div></div>' +
+      '<div class="banner banner-info"><span data-share-status>BATIYO prépare une image nette de votre document pour WhatsApp…</span></div>';
     const m = ui().modal({ title: 'Partager le document', body: body });
-    const wa = B.el('<button class="btn btn-primary">' + ui().icon('whatsapp', 17) + ' Partager sur WhatsApp</button>');
+    const wa = B.el('<button class="btn btn-primary">' + ui().icon('whatsapp', 17) + ' Partager le document sur WhatsApp</button>');
     const copy = B.el('<button class="btn btn-ghost">' + ui().icon('copy', 17) + ' Copier le message</button>');
     const close = B.el('<button class="btn btn-ghost" data-close>Fermer</button>');
+    wa.disabled = true;
     m.foot.appendChild(close); m.foot.appendChild(copy); m.foot.appendChild(wa);
-    wa.addEventListener('click', function () {
+
+    /* Préparer l’image avant le clic : le partage natif doit conserver le geste utilisateur. */
+    let imageFile = null;
+    let imageError = null;
+    makeDocumentShareImage(entity, doc).then(function (file) {
+      imageFile = file;
+      const status = B.$('[data-share-status]', body);
+      if (status) status.textContent = 'Votre document est prêt sous forme d’image. Appuyez sur le bouton pour le partager.';
+      wa.disabled = false;
+    }).catch(function (error) {
+      imageError = error;
+      const status = B.$('[data-share-status]', body);
+      if (status) status.textContent = 'La création automatique de l’image a échoué. Vous pourrez tout de même ouvrir WhatsApp avec le message.';
+      wa.disabled = false;
+    });
+
+    wa.addEventListener('click', async function () {
       const text = B.$('[data-msg]', body).value;
-      const phone = client && client.phone ? client.phone : '';
-      window.open(B.waLink(phone, text), '_blank', 'noopener');
-      B.pdf.openPreview(entity === 'quote' ? B.pdf.quoteHTML(doc) : B.pdf.invoiceHTML(doc), { filename: doc.number, documentType: entity, documentId: doc.id });
-      ui().toast('Message prêt. Pensez à joindre le PDF.', 'info');
+      if (!imageFile) {
+        const phone = '';
+        window.open(B.waLink(phone, text), '_blank', 'noopener');
+        if (imageError) ui().toast('WhatsApp est ouvert. L’image n’a pas pu être préparée sur cet appareil.', 'warning');
+        else ui().toast('Préparation en cours. Réessayez dans un instant.', 'info');
+        return;
+      }
+      try {
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+          await navigator.share({ files: [imageFile], title: doc.number || 'Document BATIYO', text: text });
+          ui().toast('Document prêt à être envoyé depuis le partage WhatsApp.', 'success');
+          m.close();
+          return;
+        }
+      } catch (error) {
+        if (error && error.name === 'AbortError') return;
+      }
+      /* Repli : enregistrer l’image puis ouvrir WhatsApp avec le texte. */
+      const url = URL.createObjectURL(imageFile);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = imageFile.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+      window.open(B.waLink('', text), '_blank', 'noopener');
+      ui().toast('Image enregistrée. Joignez-la dans WhatsApp pour envoyer le document.', 'info');
       m.close();
     });
     copy.addEventListener('click', function () {
