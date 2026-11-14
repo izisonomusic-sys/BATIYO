@@ -524,6 +524,8 @@
   async function shareDialog(entity, doc) {
     if (B.entitlementService && !(await B.entitlementService.requireDocumentExport(entity, doc))) return;
     const msg = B.pdf.shareMessage(entity, doc);
+    const client = B.clientService.get(doc.client_id);
+    const phone = client && client.phone ? client.phone : '';
     const body = B.el('<div class="stack"></div>');
     body.innerHTML =
       '<div class="field"><label>Message préparé</label><textarea class="textarea" data-msg rows="5">' + h(msg) + '</textarea>' +
@@ -554,7 +556,6 @@
     wa.addEventListener('click', async function () {
       const text = B.$('[data-msg]', body).value;
       if (!imageFile) {
-        const phone = '';
         window.open(B.waLink(phone, text), '_blank', 'noopener');
         if (imageError) ui().toast('WhatsApp est ouvert. L’image n’a pas pu être préparée sur cet appareil.', 'warning');
         else ui().toast('Préparation en cours. Réessayez dans un instant.', 'info');
@@ -579,7 +580,7 @@
       link.click();
       link.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-      window.open(B.waLink('', text), '_blank', 'noopener');
+      window.open(B.waLink(phone, text), '_blank', 'noopener');
       ui().toast('Image enregistrée. Joignez-la dans WhatsApp pour envoyer le document.', 'info');
       m.close();
     });
